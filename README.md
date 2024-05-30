@@ -414,7 +414,7 @@ None
 
 ```yaml
 ---
-- name: 'Deploy files'
+- name: 'Deploy a base configuration on OpenWrt devices'
   hosts: 'all'
   gather_facts: false
   vars:
@@ -795,7 +795,7 @@ None
         day: 1
         job: '/bin/opkg update 2>&1 > /dev/null'
   roles:
-    - role: 'file_deployment'
+    - role: 'openwrt_base'
 ...
 ```
 
