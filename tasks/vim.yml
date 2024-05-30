@@ -44,13 +44,13 @@
         content: '{{ _owb_vimrc_simplistic_content }}'
         dest: >-
           {{
-            '{{ __t_user.home }}/.vimrc'
+            __t_user.home ~ '/.vimrc'
             if
             __t_user.home is defined
             and __t_user.home != ''
             and __t_user.home != None
             else
-            '/home/{{ __t_user.name }}/.vimrc'
+            '/home/' ~ __t_user.name ~ '/.vimrc'
           }}
         owner: '{{ __t_user.name }}'
         group: '{{ __t_user.name }}'
