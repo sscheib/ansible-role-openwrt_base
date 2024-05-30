@@ -57,8 +57,6 @@ matrix:
       output: '.github/spellcheck/spellcheck.dic'
 
     aspell:
-      # mode: 'markdown'  # this is only supported with aspell 0.60.8, which is not available on RHEL 8
-      # see: https://github.com/GNUAspell/aspell/releases/tag/rel-0.60.8
       lang: 'en'
       d: 'en_US'
       ignore-case: true
