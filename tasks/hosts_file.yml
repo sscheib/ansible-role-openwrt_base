@@ -1,0 +1,24 @@
+---
+- name: 'hosts_file: Ensure network facts are gathered'
+  ansible.builtin.setup:
+    gather_subset:
+      - '!all'
+      - '!min'
+      - 'interfaces'
+      - 'network'
+
+- name: 'hosts_file: Ensure hosts file exists: {{ _owb_hosts_file_path }}'
+  ansible.builtin.copy:
+    content: |
+      127.0.0.1 localhost.localdomain localhost
+      {{
+        hostvars[inventory_hostname]
+        ['ansible_' ~ _owb_lan_interface_name | replace('-', '_')]
+        ['ipv4']['address']
+      }} {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}
+    dest: '{{ _owb_hosts_file_path }}'
+    owner: '{{ _owb_hosts_file_owner }}'
+    group: '{{ _owb_hosts_file_group }}'
+    mode: '{{ _owb_hosts_file_mode }}'
+  become: true
+...

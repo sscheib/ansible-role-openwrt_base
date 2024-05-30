@@ -1,0 +1,819 @@
+---
+- name: 'assert | Ensure _owb_quiet_assert is defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) is boolean"
+      - "lookup('ansible.builtin.vars', __t_var) | bool | string == lookup('ansible.builtin.vars', __t_var) | string"
+    success_msg: "Variable '{{ __t_var }}' defined properly - value: '{{ lookup('ansible.builtin.vars', __t_var) }}'"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert | default(false) }}'
+  loop:
+    - '_owb_quiet_assert'
+  loop_control:
+    loop_var: '__t_var'
+
+- name: 'assert | Ensure boolean variables are defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) is boolean"
+      - "lookup('ansible.builtin.vars', __t_var) | bool | string == lookup('ansible.builtin.vars', __t_var) | string"
+    success_msg: "Variable '{{ __t_var }}' defined properly - value: '{{ lookup('ansible.builtin.vars', __t_var) }}'"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert }}'
+  loop:
+    - '_owb_authorized_keys_enable'
+    - '_owb_authorized_keys_no_log'
+    - '_owb_base_packages_enable'
+    - '_owb_chrony_check_sources_enable'
+    - '_owb_chrony_disable_ipv6'
+    - '_owb_chrony_enable'
+    - '_owb_cron_enable'
+    - '_owb_hostname_enable'
+    - '_owb_hosts_file_enable'
+    - '_owb_mounts_enable'
+    - '_owb_password_hash_encryption_enable'
+    - '_owb_profile_d_configuration_enable'
+    - '_owb_profile_d_creation_enable'
+    - '_owb_rc_local_enable'
+    - '_owb_rc_local_enable_mwan3_restart'
+    - '_owb_rc_local_enable_redirect_dev_null'
+    - '_owb_rc_local_enable_restore_iptables'
+    - '_owb_rc_local_enable_sleep'
+    - '_owb_rc_local_enable_write_to_serial'
+    - '_owb_root_password_enable'
+    - '_owb_root_shell_enable'
+    - '_owb_shadow_enable'
+    - '_owb_sudoers_d_enable'
+    - '_owb_sysctl_enable'
+    - '_owb_uci_keys_enable'
+    - '_owb_uci_keys_removal_enable'
+    - '_owb_users_enable'
+    - '_owb_vim_enable'
+    - '_owb_vimrc_default_configuration_enable'
+    - '_owb_vimrc_simplistic_user_vimrc_enable'
+  loop_control:
+    loop_var: '__t_var'
+
+- name: 'assert | Ensure list variables are defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) is sequence"
+      - "lookup('ansible.builtin.vars', __t_var) is iterable"
+      - "lookup('ansible.builtin.vars', __t_var) is not mapping"
+      - "lookup('ansible.builtin.vars', __t_var) | list | string == lookup('ansible.builtin.vars', __t_var) | string"
+    success_msg: "Variable '{{ __t_var }}' defined properly - value: '{{ lookup('ansible.builtin.vars', __t_var) }}'"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert }}'
+  loop:
+    - '_owb_cron_jobs'
+    - '_owb_mounts'
+    - '_owb_profile_d_files'
+    - '_owb_shadow_packages'
+    - '_owb_shell_packages'
+    - '_owb_sysctl_keys'
+    - '_owb_uci_keys'
+    - '_owb_uci_keys_remove'
+    - '_owb_users'
+    - '_owb_users_required_packages'
+    - '_owb_vim_package_match_list'
+    - '_owb_vimrc_users'
+  loop_control:
+    loop_var: '__t_var'
+
+- name: 'assert | Ensure _owb_cron_jobs is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'name'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_cron_jobs |
+        rejectattr('name', 'undefined') |
+        rejectattr('name', '==', 'None') |
+        rejectattr('name', '==', '') |
+        selectattr('name', 'string') |
+        length | default([])
+        ==
+        _owb_cron_jobs |
+        length
+    success_msg: 'All cron jobs in _owb_cron_jobs are properly defined'
+    fail_msg: 'One or more cron jobs in _owb_cron_jobs failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_mounts is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'group'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('group', 'undefined') |
+        rejectattr('group', '==', 'None') |
+        rejectattr('group', '==', '') |
+        selectattr('group', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+      # attribute 'mode'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('mode', 'undefined') |
+        rejectattr('mode', '==', 'None') |
+        rejectattr('mode', '==', '') |
+        selectattr('mode', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+      # attribute 'owner'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('owner', 'undefined') |
+        rejectattr('owner', '==', 'None') |
+        rejectattr('owner', '==', '') |
+        selectattr('owner', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+      # attribute 'path'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('path', 'undefined') |
+        rejectattr('path', '==', 'None') |
+        rejectattr('path', '==', '') |
+        selectattr('path', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+      # attribute 'src'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('src', 'undefined') |
+        rejectattr('src', '==', 'None') |
+        rejectattr('src', '==', '') |
+        selectattr('src', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+      # attribute 'state'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_mounts |
+        rejectattr('state', 'undefined') |
+        rejectattr('state', '==', 'None') |
+        rejectattr('state', '==', '') |
+        selectattr('state', 'string') |
+        length | default([])
+        ==
+        _owb_mounts |
+        length | default([])
+
+    success_msg: 'All mounts in _owb_mounts are properly defined'
+    fail_msg: 'One or more mounts in _owb_mounts failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_profile_d_files is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'group'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_profile_d_files |
+        rejectattr('group', 'undefined') |
+        rejectattr('group', '==', 'None') |
+        rejectattr('group', '==', '') |
+        selectattr('group', 'string') |
+        length | default([])
+        ==
+        _owb_profile_d_files |
+        length | default([])
+
+      # attribute 'mode'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_profile_d_files |
+        rejectattr('mode', 'undefined') |
+        rejectattr('mode', '==', 'None') |
+        rejectattr('mode', '==', '') |
+        selectattr('mode', 'string') |
+        length | default([])
+        ==
+        _owb_profile_d_files |
+        length | default([])
+
+      # attribute 'owner'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_profile_d_files |
+        rejectattr('owner', 'undefined') |
+        rejectattr('owner', '==', 'None') |
+        rejectattr('owner', '==', '') |
+        selectattr('owner', 'string') |
+        length | default([])
+        ==
+        _owb_profile_d_files |
+        length | default([])
+
+      # attribute 'src'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_profile_d_files |
+        rejectattr('src', 'undefined') |
+        rejectattr('src', '==', 'None') |
+        rejectattr('src', '==', '') |
+        selectattr('src', 'string') |
+        length | default([])
+        ==
+        _owb_profile_d_files |
+        length | default([])
+
+      # attribute 'destination_suffix' - optional
+      # if set, ensure that:
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        (
+          _owb_profile_d_files |
+          selectattr('destination_suffix', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_profile_d_files |
+          rejectattr('destination_suffix', 'undefined') |
+          rejectattr('destination_suffix', '==', 'None') |
+          rejectattr('destination_suffix', '==', '') |
+          selectattr('destination_suffix', 'string') |
+          length | default([])
+          ==
+          _owb_profile_d_files |
+          rejectattr('destination_suffix', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'template' - optional
+      # if set, ensure that:
+      #   - is a boolean
+      - >-
+        (
+          _owb_profile_d_files |
+          selectattr('template', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_profile_d_files |
+          rejectattr('template', 'undefined') |
+          selectattr('template', 'boolean') |
+          length | default([])
+          ==
+          _owb_profile_d_files |
+          rejectattr('template', 'undefined') |
+          length | default([]),
+          true
+        )
+
+    success_msg: 'All files in _owb_profile_d_files are properly defined'
+    fail_msg: 'One or more files in _owb_profile_d_files failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_sysctl_keys is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'name'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_sysctl_keys |
+        rejectattr('name', 'undefined') |
+        rejectattr('name', '==', 'None') |
+        rejectattr('name', '==', '') |
+        selectattr('name', 'string') |
+        length | default([])
+        ==
+        _owb_sysctl_keys |
+        length | default([])
+
+      # attribute 'value'
+      # ensure that:
+      #   - set for all items
+      # Note: sysctl key values can have a variety of data formats; Trying to validate them
+      #       is not reasonable, therefore only the existence is validated.
+      - >-
+        _owb_sysctl_keys |
+        rejectattr('name', 'undefined') |
+        length | default([])
+        ==
+        _owb_sysctl_keys |
+        length | default([])
+    success_msg: 'All sysctl keys in _owb_sysctl_keys are properly defined'
+    fail_msg: 'One or more sysctl keys in _owb_sysctl_keys failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_uci_keys is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'key'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_uci_keys |
+        rejectattr('key', 'undefined') |
+        rejectattr('key', '==', 'None') |
+        rejectattr('key', '==', '') |
+        selectattr('key', 'string') |
+        length | default([])
+        ==
+        _owb_uci_keys |
+        length | default([])
+
+      # attribute 'value'
+      # ensure that:
+      #   - set for all items
+      # Note: UCI key values can have a variety of data formats; Trying to validate them
+      #       is not reasonable, therefore only the existence is validated.
+      - >-
+        _owb_sysctl_keys |
+        rejectattr('name', 'undefined') |
+        length | default([])
+        ==
+        _owb_sysctl_keys |
+        length | default([])
+
+    success_msg: 'All UCI keys in _owb_uci_keys are properly defined'
+    fail_msg: 'One or more UCI keys in _owb_uci_keys failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_users is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'name'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_users |
+        rejectattr('name', 'undefined') |
+        rejectattr('name', '==', 'None') |
+        rejectattr('name', '==', '') |
+        selectattr('name', 'string') |
+        length | default([])
+        ==
+        _owb_users |
+        length | default([])
+
+      # attribute 'additional_groups' - optional
+      # if set, ensure that:
+      #   - is a sequence
+      - >-
+        (
+          _owb_users |
+          selectattr('additional_groups', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          selectattr('additional_groups', 'sequence') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'additional_groups' - optional
+      # if set, ensure that:
+      #   - it is not empty
+      - >-
+        (
+          _owb_users |
+          selectattr('additional_groups', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          map(attribute='additional_groups') |
+          ansible.builtin.flatten |
+          length > 0,
+          true
+        )
+
+      # attribute 'additional_groups' - optional
+      # if set, ensure that:
+      #   - each group has the required attribute 'name' set
+      #   - each group's 'name' attribute is not empty('')
+      #   - each group's 'name' attribute is not None
+      - >-
+        (
+          _owb_users |
+          selectattr('additional_groups', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          map(attribute='additional_groups', default=[]) |
+          ansible.builtin.flatten |
+          rejectattr('name', 'undefined') |
+          rejectattr('name', '==', '') |
+          rejectattr('name', '==', 'None') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          map(attribute='additional_groups', default=[]) |
+          ansible.builtin.flatten |
+          length | default([]),
+          true
+        )
+
+      # attribute 'additional_groups' - optional
+      # if the optional attribute 'privileged' is set, ensure that:
+      #   - it is a boolean
+      - >-
+        (
+          _owb_users |
+          selectattr('additional_groups', 'defined') |
+          map(attribute='additional_groups') |
+          ansible.builtin.flatten |
+          selectattr('privileged', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          map(attribute='additional_groups', default=[]) |
+          ansible.builtin.flatten |
+          rejectattr('privileged', 'undefined') |
+          selectattr('privileged', 'boolean') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('additional_groups', 'undefined') |
+          map(attribute='additional_groups', default=[]) |
+          ansible.builtin.flatten |
+          rejectattr('privileged', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'authorized_keys' - optional
+      # if set, ensure that:
+      #   - is a sequence
+      - >-
+        (
+          _owb_users |
+          selectattr('authorized_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          selectattr('authorized_keys', 'sequence') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'authorized_keys' - optional
+      # if set, ensure that:
+      #   - it is not empty
+      - >-
+        (
+          _owb_users |
+          selectattr('authorized_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys') |
+          ansible.builtin.flatten |
+          length > 0,
+          true
+        )
+
+      # attribute 'authorized_keys' - optional
+      # if set, ensure that, all items:
+      #   - are strings
+      #   - not empty ('')
+      #   - not None
+      - >-
+        (
+          _owb_users |
+          selectattr('authorized_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys') |
+          ansible.builtin.flatten |
+          select('string') |
+          reject('==', '') |
+          reject('==', 'None') |
+          length | default()
+          ==
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys') |
+          ansible.builtin.flatten |
+          length | default(),
+          true
+        )
+
+      # attribute 'group' - optional
+      # if set, ensure that:
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        (
+          _owb_users |
+          selectattr('group', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('group', 'undefined') |
+          rejectattr('group', '==', 'None') |
+          rejectattr('group', '==', '') |
+          selectattr('group', 'string') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('group', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'home' - optional
+      # if set, ensure that:
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        (
+          _owb_users |
+          selectattr('home', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('home', 'undefined') |
+          rejectattr('home', '==', 'None') |
+          rejectattr('home', '==', '') |
+          selectattr('home', 'string') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('home', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'password' - optional
+      # if set, ensure that:
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        (
+          _owb_users |
+          selectattr('password', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('password', 'undefined') |
+          rejectattr('password', '==', 'None') |
+          rejectattr('password', '==', '') |
+          selectattr('password', 'string') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('password', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'privileged' - optional
+      # if set, ensure that:
+      #   - is a boolean
+      - >-
+        (
+          _owb_users |
+          selectattr('privileged', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('privileged', 'undefined') |
+          selectattr('privileged', 'boolean') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('privileged', 'undefined') |
+          length | default([]),
+          true
+        )
+
+      # attribute 'remove_unspecified_ssh_keys' - optional
+      # if set, ensure that:
+      #   - is a boolean
+      - >-
+        (
+          _owb_users |
+          selectattr('remove_unspecified_ssh_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('remove_unspecified_ssh_keys', 'undefined') |
+          selectattr('remove_unspecified_ssh_keys', 'boolean') |
+          length | default([])
+          ==
+          _owb_users |
+          rejectattr('remove_unspecified_ssh_keys', 'undefined') |
+          length | default([]),
+          true
+        )
+
+    success_msg: 'All files in _owb_users are properly defined'
+    fail_msg: 'One or more users or their groups in _owb_users failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure _owb_vimrc_users is defined properly'
+  ansible.builtin.assert:
+    that:
+      # attribute 'name'
+      # ensure that:
+      #   - set for all items
+      #   - is a string
+      #   - not empty ('')
+      #   - not undefined (None)
+      - >-
+        _owb_vimrc_users |
+        rejectattr('name', 'undefined') |
+        rejectattr('name', '==', 'None') |
+        rejectattr('name', '==', '') |
+        selectattr('name', 'string') |
+        length | default([])
+        ==
+        _owb_vimrc_users |
+        length
+    success_msg: 'All users in _owb_vimrc_users are properly defined'
+    fail_msg: 'One or more users in _owb_vimrc_users failed to validate'
+    quiet: '{{ _owb_quiet_assert }}'
+  when:
+    - '_owb_vimrc_users is defined'
+    - '_owb_vimrc_users | length > 0'
+
+- name: 'assert | Ensure string variables are defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) is string"
+      - "lookup('ansible.builtin.vars', __t_var) != None"
+      - "lookup('ansible.builtin.vars', __t_var) != ''"
+    success_msg: "Variable '{{ __t_var }}' defined properly - value: '{{ lookup('ansible.builtin.vars', __t_var) }}'"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert }}'
+  loop:
+    - '_owb_chrony_conf_dest'
+    - '_owb_chrony_conf_group'
+    - '_owb_chrony_conf_mode'
+    - '_owb_chrony_conf_owner'
+    - '_owb_chrony_conf_src_file'
+    - '_owb_chrony_initd_file'
+    - '_owb_chrony_package_name'
+    - '_owb_chrony_service_name'
+    - '_owb_hostname'
+    - '_owb_hostname_group'
+    - '_owb_hostname_mode'
+    - '_owb_hostname_owner'
+    - '_owb_hostname_path'
+    - '_owb_hostname_proc_path'
+    - '_owb_hosts_file_group'
+    - '_owb_hosts_file_mode'
+    - '_owb_hosts_file_owner'
+    - '_owb_hosts_file_path'
+    - '_owb_lan_interface_name'
+    - '_owb_login_defs_encrypt_method'
+    - '_owb_login_defs_file'
+    - '_owb_ntpd_package_name'
+    - '_owb_password_hash'
+    - '_owb_profile_d_path'
+    - '_owb_profile_d_path_group'
+    - '_owb_profile_d_path_mode'
+    - '_owb_profile_d_path_owner'
+    - '_owb_rc_local_dest'
+    - '_owb_rc_local_group'
+    - '_owb_rc_local_mode'
+    - '_owb_rc_local_mwan3_initd_path'
+    - '_owb_rc_local_owner'
+    - '_owb_rc_local_serial_device'
+    - '_owb_rc_local_template'
+    - '_owb_root_shell'
+    - '_owb_vim_package_name'
+    - '_owb_vimrc_default_conf_dest_path'
+    - '_owb_vimrc_default_conf_group'
+    - '_owb_vimrc_default_conf_mode'
+    - '_owb_vimrc_default_conf_owner'
+    - '_owb_vimrc_default_conf_src'
+    - '_owb_vimrc_simplistic_content'
+    - '_owb_vimrc_simplistic_mode'
+  loop_control:
+    loop_var: '__t_var'
+
+- name: 'assert | Ensure secret string variables are defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) is string"
+      - "lookup('ansible.builtin.vars', __t_var) != None"
+      - "lookup('ansible.builtin.vars', __t_var) != ''"
+    success_msg: "Variable '{{ __t_var }}' defined properly"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert }}'
+  no_log: true
+  loop:
+    - '_owb_root_password'
+  loop_control:
+    loop_var: '__t_var'
+
+- name: 'assert | Ensure integer variables are defined properly'
+  ansible.builtin.assert:
+    that:
+      - "lookup('ansible.builtin.vars', __t_var) is defined"
+      - "lookup('ansible.builtin.vars', __t_var) | int | string == lookup('ansible.builtin.vars', __t_var) | string"
+      - "lookup('ansible.builtin.vars', __t_var) | int is number"
+      - "lookup('ansible.builtin.vars', __t_var) | int is integer"
+      - "lookup('ansible.builtin.vars', __t_var) | int >= 0"
+    success_msg: "Variable '{{ __t_var }}' defined properly - value: '{{ lookup('ansible.builtin.vars', __t_var) }}'"
+    fail_msg: "Variable '{{ __t_var }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert }}'
+  loop:
+    - '_owb_rc_local_sleep_seconds'
+  loop_control:
+    loop_var: '__t_var'
+...

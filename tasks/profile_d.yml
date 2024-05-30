@@ -1,0 +1,132 @@
+---
+- name: 'profile_d | Ensure profile.d path exists: {{ _owb_profile_d_path }}'
+  ansible.builtin.file:
+    path: '{{ _owb_profile_d_path }}'
+    state: 'directory'
+    owner: '{{ _owb_profile_d_path_owner }}'
+    group: '{{ _owb_profile_d_path_group }}'
+    mode: '{{ _owb_profile_d_path_mode }}'
+  become: true
+  when:
+    - '_owb_profile_d_creation_enable is defined'
+    - '_owb_profile_d_creation_enable'
+
+- name: 'profile_d | Block: Handle configuring profile.d'
+  become: true
+  when:
+    - '_owb_profile_d_configuration_enable is defined'
+    - '_owb_profile_d_configuration_enable'
+  block:
+
+    - name: 'profile_d | Transfer profil.d configuration files to {{ _owb_profile_d_path }}'
+      ansible.builtin.copy:
+        src: '{{ __t_file.src }}'
+        # the expression looks more complicated than it actually is :)
+        #
+        # breakdown:
+        # - first we check if a destination_suffix is defined for the file we iterate over
+        # - if not: we take the file name and append it to the profile.d destination path
+        # - if yes:
+        #   - we take the file name
+        #   - retrieve from the file name the extension
+        #   - append a dollar sign ('$') to the extension and use that as matcher to replace
+        #     the original extension with the destination_suffix defined
+        #   - finally, we check whether destination_suffix begins with a dot ('.')
+        #     - if not: we prefix a dot ('.') to the extension
+        #     - if yes: we take it as-is
+        dest: >-
+          {{
+            (
+              __t_file.destination_suffix is defined
+              and __t_file.destination_suffix != ''
+              and __t_file.destination_suffix != None
+            ) | ansible.builtin.ternary(
+              _owb_profile_d_path ~
+              '/' ~
+              __t_file.src |
+              ansible.builtin.basename |
+              ansible.builtin.regex_replace(
+                __t_file.src |
+                ansible.builtin.splitext |
+                last ~
+                '$',
+                (
+                  __t_file.destination_suffix | default('') |
+                  ansible.builtin.regex_search('^\.')
+                ) | ansible.builtin.ternary(
+                  __t_file.destination_suffix | default(''),
+                  '.' ~
+                  __t_file.destination_suffix | default('')
+                )
+              ),
+              _owb_profile_d_path ~
+              '/' ~
+              __t_file.src |
+              ansible.builtin.basename
+            )
+          }}
+        owner: '{{ __t_file.owner }}'
+        group: '{{ __t_file.group }}'
+        mode: '{{ __t_file.mode }}'
+      loop: >-
+        {{
+          (
+            _owb_profile_d_files |
+            selectattr('template', 'undefined')
+            +
+            _owb_profile_d_files |
+            selectattr('template', 'defined') |
+            selectattr('template', '==', false)
+          ) | ansible.builtin.flatten
+        }}
+      loop_control:
+        loop_var: '__t_file'
+        label: '{{ __t_file.src }}'
+
+    - name: 'profile_d | Template profil.d configuration files to {{ _owb_profile_d_path }}'
+      ansible.builtin.template:
+        src: '{{ __t_file.src }}'
+        # see the task above for an explanation of this expression
+        dest: >-
+          {{
+            (
+              __t_file.destination_suffix is defined
+              and __t_file.destination_suffix != ''
+              and __t_file.destination_suffix != None
+            ) | ansible.builtin.ternary(
+              _owb_profile_d_path ~
+              '/' ~
+              __t_file.src |
+              ansible.builtin.basename |
+              ansible.builtin.regex_replace(
+                __t_file.src |
+                ansible.builtin.splitext |
+                last ~
+                '$',
+                (
+                  __t_file.destination_suffix | default('') |
+                  ansible.builtin.regex_search('^\.')
+                ) | ansible.builtin.ternary(
+                  __t_file.destination_suffix | default(''),
+                  '.' ~
+                  __t_file.destination_suffix | default('')
+                )
+              ),
+              _owb_profile_d_path ~
+              '/' ~
+              __t_file.src |
+              ansible.builtin.basename
+            )
+          }}
+        owner: '{{ __t_file.owner }}'
+        mode: '{{ __t_file.mode }}'
+      loop: >-
+        {{
+          _owb_profile_d_files |
+          selectattr('template', 'defined') |
+          selectattr('template', '==', true)
+        }}
+      loop_control:
+        loop_var: '__t_file'
+        label: '{{ __t_file.src }}'
+...

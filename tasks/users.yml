@@ -1,0 +1,67 @@
+---
+- name: 'users | Ensure required packages are present'
+  ansible.builtin.package:
+    name: '{{ _owb_users_required_packages }}'
+    update_cache: true
+    state: 'present'
+  become: true
+
+- name: 'users | Ensure groups are present'
+  ansible.builtin.group:
+    name: '{{ __t_group }}'
+  become: true
+  # combine all primary groups ('group') with additional groups and
+  # ensure no duplicates are present
+  loop: >-
+    {{
+      (
+        _owb_users |
+        selectattr('group', 'defined') |
+        map(attribute='group')
+        +
+        _owb_users |
+        map(attribute='additional_groups', default=[]) |
+        ansible.builtin.flatten |
+        map(attribute='name', default='')
+      ) | ansible.builtin.flatten |
+      unique
+    }}
+  loop_control:
+    loop_var: '__t_group'
+
+- name: 'users | Ensure users are present'
+  ansible.builtin.user:
+    name: '{{ __t_user.name }}'
+    group: '{{ __t_user.group | default(omit) }}'
+    groups: >-
+      {{
+        (
+          __t_user.additional_groups is defined
+          and __t_user.additional_groups | length > 0
+        ) | ansible.builtin.ternary(
+          __t_user.additional_groups | default([]) |
+          map(attribute='name', default=[]) |
+          join(','),
+          omit
+        )
+      }}
+    password: >-
+      {{
+        (
+          __t_user.password is defined
+          and __t_user.password != ''
+          and __t_user.password != None
+        ) | ansible.builtin.ternary(
+          __t_user.password | default('') |
+          ansible.builtin.password_hash(_owb_password_hash),
+          '*'
+        )
+      }}
+    shell: '{{ __t_user.shell | default(omit) }}'
+    home: '{{ __t_user.home | default(omit) }}'
+  become: true
+  loop: '{{ _owb_users }}'
+  loop_control:
+    loop_var: '__t_user'
+    label: '{{ __t_user.name }}'
+...

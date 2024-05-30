@@ -1,0 +1,26 @@
+---
+- name: 'cron | Ensure cron jobs are present'
+  ansible.builtin.cron:
+    name: '{{ __t_job.name }}'
+    backup: '{{ __t_job.backup | default(omit) }}'
+    cron_file: '{{ __t_job.cron_file | default(omit) }}'
+    day: '{{ __t_job.day | default(omit) }}'
+    disabled: '{{ __t_job.disabled | default(omit) }}'
+    env: '{{ __t_job.env | default(omit) }}'
+    hour: '{{ __t_job.hour | default(omit) }}'
+    insertafter: '{{ __t_job.insertafter | default(omit) }}'
+    insertbefore: '{{ __t_job.insertbefore | default(omit) }}'
+    job: '{{ __t_job.job | default(omit) }}'
+    minute: '{{ __t_job.minute | default(omit) }}'
+    month: '{{ __t_job.month | default(omit) }}'
+    special_time: '{{ __t_job.special_time | default(omit) }}'
+    state: '{{ __t_job.state | default(omit) }}'
+    user: '{{ __t_job.user | default(omit) }}'
+    weekday: '{{ __t_job.weekday | default(omit) }}'
+  become: true
+  notify: 'Restart cron'
+  loop: '{{ _owb_cron_jobs }}'
+  loop_control:
+    loop_var: '__t_job'
+    label: '{{ __t_job.name }}'
+...

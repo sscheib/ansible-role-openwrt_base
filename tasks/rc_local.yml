@@ -1,0 +1,10 @@
+---
+- name: 'rc_local | Create rc.local file at: {{ _owb_rc_local_dest }}'
+  ansible.builtin.template:
+    src: '{{ _owb_rc_local_template }}'
+    dest: '{{ _owb_rc_local_dest }}'
+    owner: '{{ _owb_rc_local_owner }}'
+    group: '{{ _owb_rc_local_group }}'
+    mode: '{{ _owb_rc_local_mode }}'
+  become: true
+...

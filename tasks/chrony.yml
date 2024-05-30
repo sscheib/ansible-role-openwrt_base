@@ -1,0 +1,71 @@
+---
+- name: 'chrony | Install chrony: {{ _owb_chrony_package_name }}'
+  ansible.builtin.package:
+    name: '{{ _owb_chrony_package_name }}'
+    state: 'present'
+    update_cache: true
+  become: true
+
+- name: 'chrony | Ensure ntpd is not installed: {{ _owb_ntpd_package_name }}'
+  ansible.builtin.package:
+    name: '{{ _owb_ntpd_package_name }}'
+    state: 'absent'
+    update_cache: false
+  become: true
+
+- name: 'chrony | Create chrony configuration: {{ _owb_chrony_conf_dest }}'  # nospell
+  ansible.builtin.template:
+    src: '{{ _owb_chrony_conf_src_file }}'
+    dest: '{{ _owb_chrony_conf_dest }}'
+    owner: '{{ _owb_chrony_conf_owner }}'
+    group: '{{ _owb_chrony_conf_group }}'
+    mode: '{{ _owb_chrony_conf_mode }}'
+  become: true
+
+- name: 'chrony | Disable IPv6 for chrony in: {{ _owb_chrony_initd_file }}'  # nospell
+  ansible.builtin.lineinfile:
+    regexp: '^(.*)(procd_set_param command \$PROG -n)(?: -4)?(.*)$'
+    line: '\1\2 -4\3'
+    path: '{{ _owb_chrony_initd_file }}'
+    backrefs: true
+  become: true
+  register: '__t_chrony_config'
+  notify: 'Restart chronyd'
+  when:
+    - '_owb_chrony_disable_ipv6 is defined'
+    - '_owb_chrony_disable_ipv6'
+
+- name: 'chrony | Start and enable chrony: {{ _owb_chrony_service_name }}'
+  ansible.builtin.service:
+    name: '{{ _owb_chrony_service_name }}'
+    state: 'started'
+    enabled: true
+  become: true
+
+- name: 'chrony | Flush handlers to ensure chronyd restarts prior to checking if it is running'
+  ansible.builtin.meta: 'flush_handlers'
+  when:
+    - '__t_chrony_config.changed is defined'
+    - '__t_chrony_config.changed'
+
+- name: 'chrony | Ensure chrony is running: {{ _owb_chrony_service_name }}'
+  ansible.builtin.service:
+    name: '{{ _owb_chrony_service_name }}'
+    state: 'started'
+  become: true
+  register: '__t_chrony_state'
+  failed_when:
+    - '__t_chrony_state.failed is defined'
+    - '__t_chrony_state.failed'
+
+- name: 'chrony | Check if chrony is able to reach the defined servers'  # noqa: command-instead-of-shell
+  ansible.builtin.shell:
+    cmd: 'chronyc sources'
+  become: true
+  register: '__t_chrony_sources'
+  failed_when: '__t_chrony_sources.rc != 0'
+  changed_when: false
+  when:
+    - '_owb_chrony_check_sources_enable is defined'
+    - '_owb_chrony_check_sources_enable'
+...

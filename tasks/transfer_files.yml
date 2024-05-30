@@ -1,0 +1,42 @@
+---
+- name: 'transfer_files | Transfer files'
+  ansible.builtin.copy:
+    src: '{{ __t_file.src }}'
+    dest: '{{ __t_file.dest }}'
+    owner: '{{ __t_file.owner }}'
+    group: '{{ __t_file.group }}'
+    mode: '{{ __t_file.mode }}'
+  become: '{{ __t_file.become | default(false) }}'
+  loop: >-
+    {{
+      (
+        _owb_transfer_files |
+        selectattr('template', 'undefined')
+        +
+        _owb_transfer_files |
+        selectattr('template', 'defined') |
+        selectattr('template', '!=', true)
+      ) | ansible.builtin.flatten
+    }}
+  loop_control:
+    loop_var: '__t_file'
+    label: "{{ __t_file.src ~ ' -> ' ~ __t_file.dest }}"
+
+- name: 'transfer_files | Template files'
+  ansible.builtin.template:
+    src: '{{ __t_file.src }}'
+    dest: '{{ __t_file.dest }}'
+    owner: '{{ __t_file.owner }}'
+    group: '{{ __t_file.group }}'
+    mode: '{{ __t_file.mode }}'
+  become: '{{ __t_file.become | default(false) }}'
+  loop: >-
+    {{
+      _owb_transfer_files |
+      selectattr('template', 'defined') |
+      selectattr('template', '==', true)
+    }}
+  loop_control:
+    loop_var: '__t_file'
+    label: "{{ __t_file.src ~ ' -> ' ~ __t_file.dest }}"
+...

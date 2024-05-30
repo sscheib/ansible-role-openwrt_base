@@ -1,0 +1,34 @@
+---
+- name: 'Commit uci changes'  # noqa: command-instead-of-shell
+  ansible.builtin.shell:
+    cmd: 'uci commit'
+  become: true
+  notify:
+    - 'Restart system service'
+    - 'Restart cron'
+    - 'Restart dnsmasq'
+
+- name: 'Restart system service'
+  ansible.builtin.service:
+    name: 'system'
+    state: 'restarted'
+  become: true
+
+- name: 'Restart cron'
+  ansible.builtin.service:
+    name: 'cron'
+    state: 'restarted'
+  become: true
+
+- name: 'Restart chronyd'
+  ansible.builtin.service:
+    name: 'chronyd'
+    state: 'restarted'
+  become: true
+
+- name: 'Restart dnsmasq'
+  ansible.builtin.service:
+    name: 'dnsmasq'
+    state: 'restarted'
+  become: true
+...

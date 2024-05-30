@@ -1,0 +1,43 @@
+---
+- name: 'mounts | Install required packages'
+  ansible.builtin.package:
+    name: '{{ _owb_mounts_required_packages }}'
+    update_cache: true
+  become: true
+  when:
+    - '_owb_mounts_required_packages is defined'
+    - "_owb_mounts_required_packages != ''"
+    - '_owb_mounts_required_packages != None'
+    - '_owb_mounts_required_packages | length > 0'
+
+- name: 'mounts | Ensure mount point exist with appropriate permissions'
+  ansible.builtin.file:
+    path: '{{ __t_mount.path }}'
+    state: 'directory'
+    owner: '{{ __t_mount.owner }}'
+    group: '{{ __t_mount.group }}'
+    mode: '{{ __t_mount.mode }}'
+  become: true
+  loop: '{{ _owb_mounts }}'
+  loop_control:
+    loop_var: '__t_mount'
+    label: '{{ __t_mount.path }}'
+
+- name: 'mounts | Ensure mounts are mounted'
+  ansible.posix.mount:
+    path: '{{ __t_mount.path }}'
+    src: '{{ __t_mount.src }}'
+    state: '{{ __t_mount.state }}'
+    backup: '{{ __t_mount.backup | default(omit) }}'
+    boot: '{{ __t_mount.boot | default(omit) }}'
+    dump: '{{ __t_mount.dump | default(omit) }}'
+    fstab: '{{ __t_mount.fstab | default(omit) }}'
+    fstype: '{{ __t_mount.fstype | default(omit) }}'
+    opts: '{{ __t_mount.opts | default(omit) }}'
+    passno: '{{ __t_mount.passno | default(omit) }}'
+  become: true
+  loop: '{{ _owb_mounts }}'
+  loop_control:
+    loop_var: '__t_mount'
+    label: '{{ __t_mount.path }}'
+...

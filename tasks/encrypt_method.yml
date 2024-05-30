@@ -1,0 +1,18 @@
+---
+- name: 'encrypt_method | Ensure required shadow packages are present'
+  ansible.builtin.package:
+    name: '{{ _owb_shadow_packages }}'
+  # we need the shadow package to apply below configuration,
+  # but if shadow packages were installed previously, there is no need
+  # to repeat the installation
+  when: >-
+    _owb_shadow_enable is not defined
+    or not _owb_shadow_enable
+
+- name: 'encrypt_method | Ensure password encryption is done with: {{ _owb_login_defs_encrypt_method }}'
+  ansible.builtin.lineinfile:
+    regexp: '^ENCRYPT_METHOD.+?$'
+    line: 'ENCRYPT_METHOD {{ _owb_login_defs_encrypt_method }}'
+    path: '{{ _owb_login_defs_file }}'
+  become: true
+...

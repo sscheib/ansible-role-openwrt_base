@@ -1,0 +1,430 @@
+---
+#
+# UCI
+#
+
+# whether to enable the setting of UCI keys
+_def_owb_uci_keys_enable: false
+
+# UCI keys to set
+# source: https://openwrt.org/docs/guide-user/base-system/system_configuration
+_def_owb_uci_keys:
+  # hostname
+  - key: 'system.@system[0].hostname'
+    value: 'openwrt'
+
+  # cron log level
+  - key: 'system.@system[0].cronloglevel'
+    value: 5
+
+  # kernel log connection log level to console
+  - key: 'system.@system[0].klogconloglevel'
+    value: 8
+
+  # timezone
+  - key: 'system.@system[0].timezone'
+    value: 'CET-1CEST,M3.5.0,M10.5.0/3'
+
+  - key: 'system.@system[0].zonename'
+    value: 'Europe/Berlin'
+
+  # disable IPv6 delegation
+  - key: 'network.lan.delegate'
+    value: 0
+
+  # disable rebind protection of dnsmasq to be able to resolve all internal hostnames
+  - key: 'dhcp.@dnsmasq[0].rebind_protection'
+    value: 0
+
+  # disable IPv6 on WAN and LAN interface
+  - key: 'network.@device[0].ipv6'
+    value: 0
+
+  - key: 'network.@device[1].ipv6'
+    value: 0
+
+  - key: 'network.wan.ipv6'
+    value: 0
+
+  - key: 'network.lan.ipv6'
+    value: 0
+
+  # disable IPv6 on loopback
+  - key: 'network.loopback.ipv6'
+    value: 0
+
+# whether to enable the removal of UCI keys
+_def_owb_uci_keys_removal_enable: false
+
+# UCI keys to delete
+# below keys remove IPv6 related UCI configurations
+_def_owb_uci_keys_remove:
+  - 'network.wan6'
+  - 'network.globals.ula_prefix'
+  - 'dhcp.lan.dhcpv6'
+  - 'dhcp.lan.ra'
+  - 'network.lan.ip6assign'
+
+#
+# sysctl
+#
+
+# whether to set sysctl keys
+_def_owb_sysctl_enable: false
+
+# keys to set in the sysctl config file
+# below disables IPv6 on all interfaces
+_def_owb_sysctl_keys:
+  - name: 'net.ipv6.conf.all.disable_ipv6'
+    reload: true
+    state: 'present'
+    sysctl_file: '/etc/sysctl.d/99-disable_ipv6.conf'
+    sysctl_set: true
+    value: 1
+
+  - name: 'net.ipv6.conf.default.disable_ipv6'
+    reload: true
+    state: 'present'
+    sysctl_file: '/etc/sysctl.d/99-disable_ipv6.conf'
+    sysctl_set: true
+    value: 1
+#
+# chrony
+#
+
+# whether to enable the installation and configuration of chrony
+_def_owb_chrony_enable: false
+
+# chrony package name
+_def_owb_chrony_package_name: 'chrony'
+
+# ntpd package name to remove
+_def_owb_ntpd_package_name: 'ntpd'
+
+# chrony service name
+_def_owb_chrony_service_name: 'chronyd'
+
+# chrony source Jinja2 template file
+_def_owb_chrony_conf_src_file: 'chrony.j2'
+
+# chrony configuration file path and permissions
+_def_owb_chrony_conf_dest: '/etc/config/chrony'
+_def_owb_chrony_conf_owner: 'root'
+_def_owb_chrony_conf_group: 'root'
+_def_owb_chrony_conf_mode: '0600'
+
+# chrony init.d script path
+_def_owb_chrony_initd_file: '/etc/init.d/chronyd'
+
+# whether to disable IPv6 in chrony
+_def_owb_chrony_disable_ipv6: false
+
+# whether to run chronyc sources to check if they are reachable
+# note: chronyc sources exits with a return code greater than 0
+#       if an issue is encountered while reaching the defined
+#       servers
+_def_owb_chrony_check_sources_enable: false
+
+#
+# rc.local
+#
+
+# whether to enable generation of an rc.local file
+_def_owb_rc_local_enable: false
+
+# source Jinja2 template for the rc.local file
+_def_owb_rc_local_template: 'rc.local.j2'
+
+# path of the rc.local file and permissions
+_def_owb_rc_local_dest: '/etc/rc.local'
+_def_owb_rc_local_owner: 'root'
+_def_owb_rc_local_group: 'root'
+_def_owb_rc_local_mode: '0755'
+
+# whether to write messages to serial device within rc.local
+_def_owb_rc_local_enable_write_to_serial: false
+
+# serial device to write to in rc.local
+_def_owb_rc_local_serial_device: '/dev/ttyS0'
+
+# whether to restart mwan3 when executing rc.local
+_def_owb_rc_local_enable_mwan3_restart: false
+
+# path to the init.d file for mwan3
+_def_owb_rc_local_mwan3_initd_path: '/etc/init.d/mwan3'
+
+# whether to sleep before applying iptables and mounting (potentially NFS paths) to
+# allow networking to come up
+_def_owb_rc_local_enable_sleep: false
+
+# number of seconds to sleep
+_def_owb_rc_local_sleep_seconds: 15
+
+# whether to enable restoring iptables within rc.local
+_def_owb_rc_local_enable_restore_iptables: false
+
+# whether to redirect command output to /dev/null in rc.local to not clutter the syslog
+_def_owb_rc_local_enable_redirect_dev_null: false
+
+#
+# root user
+#
+
+# whether to enable setting the root password
+_def_owb_root_password_enable: false
+
+# password hash to use when generating a root password
+# by default OpenWrt 21.02 - 23.05 use bcrypt
+_def_owb_password_hash: 'bcrypt'
+
+# whether to enable setting the root shell (default '/bin/sh')  # nospell
+_def_owb_root_shell_enable: false
+
+# list of packages to install prior to setting the shell for the root user
+_def_owb_shell_packages:
+  - 'bash'
+
+# path to an alternative shell to use
+# e.g.: '/bin/bash'  # nospell
+_def_owb_root_shell: '/bin/bash'
+
+#
+# shadow
+#
+
+# whether to enable the installation of the shadow package
+_def_owb_shadow_enable: false
+
+# list of packages to install to provide shadow functionality
+_def_owb_shadow_packages:
+  - 'shadow'
+  - 'sudo'
+
+#
+# password hash/encryption method
+#
+
+# whether to enable the password hash/encryption method changing
+# note: this *requires* enabling configuration of shadow, which provides
+# the file '/etc/login.defs'  # nospell
+_def_owb_password_hash_encryption_enable: false
+
+# encryption and hash to be used for user account passwords (including root)
+# important note:
+#   if changing the default encryption below, *all* existing user passwords need to be set again, as otherwise
+#   *nobody* will be able to login
+_def_owb_login_defs_encrypt_method: 'SHA512'
+
+# path to the login.defs file where the change is implemented
+_def_owb_login_defs_file: '/etc/login.defs'
+
+#
+# mounts
+#
+
+# whether to enable configuration of mounts
+_def_owb_mounts_enable: false
+
+#
+# base packages
+#
+
+# whether to install base packages
+_def_owb_base_packages_enable: false
+
+#
+# vim
+#
+
+# whether to configure vim
+_def_owb_vim_enable: false
+
+# whether to deploy a default configuration
+_def_owb_vimrc_default_configuration_enable: false
+
+# source file of the default vimrc configuration file
+_def_owb_vimrc_default_conf_src: 'vimrc'
+
+# where to place the default vimrc configuration file
+_def_owb_vimrc_default_conf_dest_path: '/usr/share/vim/vimrc'
+
+# owner, group and permissions of the vimrc default configuration file
+_def_owb_vimrc_default_conf_owner: 'root'
+_def_owb_vimrc_default_conf_group: 'root'
+_def_owb_vimrc_default_conf_mode: '0644'
+
+# whether to place a simplistic .vimrc in user directories (including /root)
+_def_owb_vimrc_simplistic_user_vimrc_enable: false
+
+# content to add to the simplistic .vimrc file
+# the below content allows for copying from the clipboard
+_def_owb_vimrc_simplistic_content: 'set clipboard=unnamed'
+
+# mode of the simplistic .vimrc
+_def_owb_vimrc_simplistic_mode: '0600'
+
+# package name of vim to install
+_def_owb_vim_package_name: 'vim-fuller'
+
+# prior to installing above package the below packages should be removed to avoid conflicts while installing
+_def_owb_vim_package_match_list:
+  - 'vim-full'
+  - 'vim-help'
+  - 'vim-runtime'
+  - 'vim'
+#
+# profile.d
+#
+
+# whether profile.d files and templates should be transferred
+_def_owb_profile_d_configuration_enable: false
+
+# whether the profile.d directory should be created
+_def_owb_profile_d_creation_enable: false
+
+# path and permissions to the profile.d directory where below BASH related scripts are placed
+_def_owb_profile_d_path: '/etc/profile.d'
+_def_owb_profile_d_path_owner: 'root'
+_def_owb_profile_d_path_group: 'root'
+_def_owb_profile_d_path_mode: '0755'
+
+# files to place in the profile.d path
+_def_owb_profile_d_files:
+  - src: 'history.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    template: true
+    destination_suffix: 'sh'
+
+  - src: 'aliases.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    template: true
+    destination_suffix: 'sh'
+
+  - src: 'general.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    template: true
+    destination_suffix: 'sh'
+
+  - src: 'ps1.sh'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    template: true
+    destination_suffix: 'sh'
+
+#
+# cron
+#
+
+# whether to enable configuration of cron
+_def_owb_cron_enable: false
+
+# cron jobs to create
+_def_owb_cron_jobs:
+  - name: 'Refresh opkg lists once a day'
+    minute: 0
+    hour: 4
+    day: 1
+    job: '/bin/opkg update 2>&1 > /dev/null'
+
+#
+# hosts file
+#
+
+# whether to enable generation of the hosts file
+_def_owb_hosts_file_enable: false
+
+# the interface name of the LAN device to detect the LAN ip
+# which will be written to /etc/hosts along with the hostname
+_def_owb_lan_interface_name: 'br-lan'
+
+# path and permissions of the hosts file (usually /etc/hosts)
+_def_owb_hosts_file_path: '/etc/hosts'
+_def_owb_hosts_file_owner: 'root'
+_def_owb_hosts_file_group: 'root'
+_def_owb_hosts_file_mode: '0644'
+
+#
+# hostname
+#
+
+# whether to create the host name file
+_def_owb_hostname_enable: false
+
+# hostname to set
+_def_owb_hostname: '{{ inventory_hostname }}'
+
+# path to the /proc item that holds the hostname
+# this is used in the rc.local to apply the hostname on each boot
+_def_owb_hostname_proc_path: '/proc/sys/kernel/hostname'
+
+# path and permissions to the host name file
+_def_owb_hostname_path: '/etc/hostname'
+_def_owb_hostname_owner: 'root'
+_def_owb_hostname_group: 'root'
+_def_owb_hostname_mode: '0644'
+
+#
+# users
+#
+
+# whether to enable user creation
+_def_owb_users_enable: false
+
+# packages required to install prior to adding users
+_def_owb_users_required_packages:
+  - 'shadow'
+  - 'sudo'
+
+#
+# sudoers.d
+#
+
+# whether to enable the creation of sudoers.d configuration files
+#
+# for every group that is defined as 'privileged' in owb_users
+# a configuration file is generated with the following content:
+#   %MY_GROUP ALL=(ALL) NOPASSWD: ALL  # nospell
+#
+# this applies to both primary groups, which are defined as 'group' and
+# additional_groups that have set the privileged flag
+#
+_def_owb_sudoers_d_enable: false
+
+# path and permissions to the sudoers.d directory
+_def_owb_sudoers_d_path: '/etc/sudoers.d'
+_def_owb_sudoers_d_owner: 'root'
+_def_owb_sudoers_d_group: 'root'
+_def_owb_sudoers_d_mode: '0755'
+
+# permissions for files placed in sudoers.d
+_def_owb_sudoers_d_files_owner: 'root'
+_def_owb_sudoers_d_files_group: 'root'
+_def_owb_sudoers_d_files_mode: '0440'
+
+#
+# authorized keys
+#
+
+# whether to enable transferring of authorized_keys defined in owb_users
+_def_owb_authorized_keys_enable: false
+
+# whether to set no_log for authorized_keys tasks
+_def_owb_authorized_keys_no_log: true
+
+#
+# general
+#
+
+# whether to quiet assert statements
+_def_owb_quiet_assert: false
+
+# whether to skip the initial assert
+_def_owb_skip_assert: false
+...

@@ -1,0 +1,112 @@
+---
+- name: 'authorized_keys | Lookup SSH keys'
+  ansible.builtin.set_fact:
+    __t_authorized_keys: >-
+      {{
+        __t_authorized_keys | default([]) + [
+          {
+            'user': __t_item.0.name,
+            'key': lookup('file', __t_item.1)
+          }
+        ]
+      }}
+  when: >-
+    lookup(
+          'first_found',
+          dict(
+            files=[
+              __t_item.1
+            ],
+            skip=true
+          )
+    ) | ansible.builtin.ternary(
+      lookup(
+        'file',
+        __t_item.1,
+        errors='ignore'
+      ),
+      false
+    )
+  no_log: '{{ _owb_authorized_keys_no_log }}'
+  loop: >-
+    {{
+      _owb_users |
+      selectattr('authorized_keys', 'defined') |
+      ansible.builtin.subelements('authorized_keys')
+    }}
+  loop_control:
+    loop_var: '__t_item'
+
+- name: 'authorized_keys | Append in-line SSH keys'
+  ansible.builtin.set_fact:
+    __t_authorized_keys: >-
+      {{
+        __t_authorized_keys | default([]) + [
+          {
+            'user': __t_item.0.name,
+            'key': __t_item.1
+          }
+        ]
+      }}
+  when: >-
+    not lookup(
+          'first_found',
+          dict(
+            files=[
+              __t_item.1
+            ],
+            skip=true
+          )
+    ) | ansible.builtin.ternary(
+      lookup(
+        'file',
+        __t_item.1,
+        errors='ignore'
+      ),
+      false
+    )
+  no_log: '{{ _owb_authorized_keys_no_log }}'
+  loop: >-
+    {{
+      _owb_users |
+      selectattr('authorized_keys', 'defined') |
+      ansible.builtin.subelements('authorized_keys')
+    }}
+  loop_control:
+    loop_var: '__t_item'
+
+- name: 'authorized_keys | Ensure authorized keys are present'
+  ansible.posix.authorized_key:
+    user: '{{ __t_user }}'
+    state: 'present'
+    # unfortunately, the module uses \n to determine a set of keys, which means
+    # that multi-line YAML wont work here, as it will mess with the \n formatting
+    # and it would end up with a long string with \n after each key :/
+    key: "{{ __t_authorized_keys | selectattr('user', '==', __t_user) | map(attribute='key') | join('\n') }}"
+    exclusive: >-
+      {{
+        (
+          _owb_users |
+          selectattr('name', '==', __t_user) |
+          selectattr('remove_unspecified_ssh_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          selectattr('name', '==', __t_user) |
+          selectattr('remove_unspecified_ssh_keys', 'defined') |
+          map(attribute='remove_unspecified_ssh_keys') |
+          first,
+          omit
+        )
+      }}
+  no_log: '{{ _owb_authorized_keys_no_log }}'
+  become: true
+  loop: >-
+    {{
+      _owb_users |
+      selectattr('authorized_keys', 'defined') |
+      map(attribute='name')
+    }}
+  loop_control:
+    loop_var: '__t_user'
+...

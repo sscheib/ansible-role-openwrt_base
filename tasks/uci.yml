@@ -1,0 +1,65 @@
+---
+- name: 'uci | Retrieve UCI key values'  # noqa: command-instead-of-shell
+  ansible.builtin.shell:
+    cmd: 'uci get {{ __t_uci_key.key }}'
+  become: true
+  register: '__t_uci_values'
+  changed_when: false
+  ignore_errors: true
+  loop: '{{ _owb_uci_keys }}'
+  loop_control:
+    loop_var: '__t_uci_key'
+    label: '{{ __t_uci_key.key }}'
+
+- name: 'uci | Set UCI values'  # noqa: command-instead-of-shell no-changed-when
+  ansible.builtin.shell:
+    cmd: 'uci set {{ __t_result.__t_uci_key.key }}={{ __t_result.__t_uci_key.value }}'
+  become: true
+  register: '__t_uci_set'
+  notify: 'Commit uci changes'
+  loop: '{{ __t_uci_values.results }}'
+  loop_control:
+    loop_var: '__t_result'
+    label: '{{ __t_result.__t_uci_key.key }}'
+  # it is required to case to a string, as integer values are
+  # not equal to a string (although the value does not differ)
+  when: '__t_result.stdout | string != __t_result.__t_uci_key.value | string'
+
+- name: 'uci | Retrieve UCI keys to remove'  # noqa: command-instead-of-shell
+  ansible.builtin.shell:
+    cmd: 'uci get {{ __t_uci_key }}'
+  become: true
+  register: '__t_remove_uci_keys'
+  changed_when: false
+  ignore_errors: true
+  loop: '{{ _owb_uci_keys_remove }}'
+  loop_control:
+    loop_var: '__t_uci_key'
+
+- name: 'uci | Remove existing UCI keys'  # noqa: command-instead-of-shell no-changed-when
+  ansible.builtin.shell:
+    cmd: 'uci delete {{ __t_result.__t_uci_key }}'
+  become: true
+  register: '__t_uci_delete'
+  notify: 'Commit uci changes'
+  loop: "{{ __t_remove_uci_keys.results }}"
+  loop_control:
+    loop_var: '__t_result'
+    label: '{{ __t_result.__t_uci_key }}'
+  when: >-
+    __t_result.failed is not defined
+    or not __t_result.failed
+
+- name: 'uci | Force handlers to run to ensure that UCI keys are committed'
+  ansible.builtin.meta: 'flush_handlers'
+  when: >-
+    (
+      __t_uci_set.changed is defined
+      and __t_uci_set.changed
+    )
+    or
+    (
+      __t_uci_delete.changed is defined
+      and __t_uci_delete.changed
+    )
+...

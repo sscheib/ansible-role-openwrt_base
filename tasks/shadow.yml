@@ -1,0 +1,7 @@
+---
+- name: 'shadow | Ensure required shadow packages are present'
+  ansible.builtin.package:
+    name: '{{ _owb_shadow_packages }}'
+    update_cache: true
+  become: true
+...

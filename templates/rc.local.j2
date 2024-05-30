@@ -1,0 +1,179 @@
+#!/bin/sh
+# {{ ansible_managed }}
+
+rc_write_message() {
+  # write to syslog
+  /usr/bin/logger -t "rc.local" "${1}"
+{%
+  if _owb_rc_local_enable_write_to_serial is defined
+  and _owb_rc_local_enable_write_to_serial
+  and _owb_rc_local_serial_device is defined
+  and _owb_rc_local_serial_device != ''
+  and _owb_rc_local_serial_device != None
+%}
+  # write to serial
+  /bin/echo "rc.local: ${1}" > {{ _owb_rc_local_serial_device }}
+{% endif %}{# if _owb_rc_local_enable_write_to_serial is defined #}
+}
+
+rc_write_message "INFO: Starting"
+{%
+  if _owb_hostname_enable is defined
+  and _owb_hostname_enable
+  and _owb_hostname_path is defined
+  and _owb_hostname_path != ''
+  and _owb_hostname_path != None
+%}
+#
+# set hostname
+#
+rc_write_message "INFO: Setting hostname to "$(/bin/cat "{{ _owb_hostname_path }}")""
+/bin/cat "{{ _owb_hostname_path }}" > "{{ _owb_hostname_proc_path }}"
+{% endif %}{# if _owb_hostname_enable is defined #}
+{%
+  if _owb_sysctl_enable is defined
+  and _owb_sysctl_enable
+  and _owb_sysctl_keys is defined
+  and _owb_sysctl_keys | length > 0
+%}
+#
+# apply sysctl values
+#
+{# process all unique entries that have a specific sysctl_file defined #}
+{# this is to avoid multiple identical blocks in the sh script where the sysctl_file is the same #}
+{%
+    for __t_path in _owb_sysctl_keys |
+    selectattr('sysctl_file', 'defined') |
+    map(attribute='sysctl_file') |
+    unique
+%}
+
+rc_write_message "INFO: Applying sysctl values from {{ __t_path }}"
+/sbin/sysctl -p {{ __t_path }}{{
+  ' >> /dev/null'
+  if _owb_rc_local_enable_redirect_dev_null is defined
+  and _owb_rc_local_enable_redirect_dev_null
+  else
+  ''
+}}
+
+returnCode="${?}"
+if [ returnCode -ne 0 ]; then
+  rc_write_message "ERROR: Failed to apply sysctl values from {{ __t_path }} (return code: '${returnCode}')"
+fi
+{%   endfor %}{# for __t_key in _owb_sysctl_keys | selectattr('sysctl_file', 'defined') #}
+{# check if there are entries that have not defined a specific sysctl_file #}
+{# for those entries only one block is required to apply values from the default of #}
+{# ansible.posix.sysctl (/etc/sysctl.conf) #}
+{%
+    if _owb_sysctl_keys |
+    rejectattr('sysctl_file', 'defined') |
+    length > 0
+%}
+
+rc_write_message "INFO: Applying sysctl values from /etc/sysctl.conf"
+/sbin/sysctl -p /etc/sysctl.conf{{
+  ' >> /dev/null'
+  if _owb_rc_local_enable_redirect_dev_null is defined
+  and _owb_rc_local_enable_redirect_dev_null
+  else
+  ''
+}}
+
+returnCode="${?}"
+if [ returnCode -ne 0 ]; then
+  rc_write_message "ERROR: Failed to apply sysctl values from /etc/sysctl.conf (return code: '${returnCode}')"
+fi
+{%   endif %}{# if _owb_sysctl_keys | rejectattr('sysctl_file', 'defined') | length > 0 #}
+{% endif %}{# if _owb_sysctl_enable is defined #}
+{%
+  if _owb_rc_local_enable_sleep is defined
+  and _owb_rc_local_enable_sleep
+%}
+#
+# sleep
+#
+rc_write_message "INFO: Sleeping {{ _owb_rc_local_sleep_seconds }} to allow networking to come up"
+/bin/sleep 15
+{% endif %} {# if _owb_rc_local_enable_sleep is defined #}
+
+{%
+  if _owb_rc_local_enable_restore_iptables is defined
+  and _owb_rc_local_enable_restore_iptables
+  and _owb_rc_local_iptables_rules_file_path is defined
+  and _owb_rc_local_iptables_rules_file_path != ''
+  and _owb_rc_local_iptables_rules_file_path != None
+%}
+#
+# restore iptables (if present)
+#
+if [ -f {{ _owb_rc_local_iptables_rules_file_path }} ]; then
+  rc_write_message "INFO: Restoring iptable rules from {{ _owb_rc_local_iptables_rules_file_path }}"
+  /bin/sh {{ _owb_rc_local_iptables_rules_file_path }}{{
+  ' >> /dev/null'
+  if _owb_rc_local_enable_redirect_dev_null is defined
+  and _owb_rc_local_enable_redirect_dev_null
+  else
+  ''
+}}
+  returnCode="${?}"
+
+  if [ returnCode -ne 0 ]; then
+    rc_write_message "ERROR: Failed to restore iptable rules from {{ _owb_rc_local_iptables_rules_file_path }}"
+    rc_write_message "ERROR: (return code: '${returnCode}')"
+  fi
+else
+  rc_write_message "INFO: iptable rules at {{ _owb_rc_local_iptables_rules_file_path }} not present, not restoring"
+fi
+{% endif %}{# _owb_rc_local_enable_restore_iptables is defined #}
+{# only process mounts that are asked for being mounted on boot #}
+{%
+  if _owb_mounts_enable is defined
+  and _owb_mounts_enable
+  and _owb_mounts is defined
+  and _owb_mounts != ''
+  and _owb_mounts != None
+  and _owb_mounts | length > 0
+  and _owb_mounts | selectattr('boot', '==', true) | length > 0
+%}
+#
+# mounts
+#
+{%   for __t_mount in _owb_mounts %}
+# mount {{ __t_mount.path }}
+rc_write_message "INFO: Mounting {{ __t_mount.path }}"
+/bin/mount {{ __t_mount.path }}{{
+  ' >> /dev/null'
+  if _owb_rc_local_enable_redirect_dev_null is defined
+  and _owb_rc_local_enable_redirect_dev_null
+  else
+  ''
+}}
+returnCode="${?}"
+
+if [ returnCode -ne 0 ]; then
+  rc_write_message "ERROR: Failed to mount {{ __t_mount.path }} (return code: '${returnCode}')"
+fi
+{%  endfor %}{# for __t_mount in _owb_mounts #}
+{% endif %}{# if _owb_mounts_enable is defined #}
+{%
+  if _owb_enable_mwan3_restart is defined
+  and _owb_enable_mwan3_restart
+  and _owb_rc_local_mwan3_initd_path is defined
+  and _owb_rc_local_mwan3_initd_path != ''
+  and _owb_rc_local_mwan3_initd_path != None
+%}
+#
+# restart mwan3 (if init.d script present)
+#
+if [ -f {{ _owb_rc_local_mwan3_initd_path }} ]; then
+  rc_write_message "INFO: Restarting mwan3"
+  {{ _owb_rc_local_mwan3_initd_path }} restart
+  returnCode="${?}"
+  if [ returnCode -ne 0 ]; then
+    rc_write_message "ERROR: Failed to restart mwan3 (return code: '${returnCode}')"
+  fi
+fi
+{% endif %}{# if _owb_enable_mwan3_restart is defined #}
+rc_write_message "INFO: Finished"
+exit 0

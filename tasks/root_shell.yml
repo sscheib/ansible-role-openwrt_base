@@ -1,0 +1,13 @@
+---
+- name: 'root_shell | Ensure required shell packages are present'
+  ansible.builtin.package:
+    name: '{{ _owb_shell_packages }}'
+    update_cache: true
+  become: true
+
+- name: 'root_shell | Set root default shell: {{ _owb_root_shell }}'
+  ansible.builtin.user:
+    name: 'root'
+    shell: '{{ _owb_root_shell }}'
+  become: true
+...

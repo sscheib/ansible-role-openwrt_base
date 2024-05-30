@@ -1,0 +1,75 @@
+set nocompatible " be iMproved
+autocmd QuickFixCmdPost *grep* cwindow
+
+let mapleader=","
+
+" more powerful backspacing
+set backspace=indent,eol,start
+set expandtab
+set modelines=0
+set shiftwidth=2
+set clipboard=unnamed
+set ttyscroll=10
+set encoding=utf-8
+set tabstop=4
+set hlsearch
+set ignorecase
+set smartcase
+set number
+" show the cursor position all the time
+set ruler
+syntax on
+colorscheme desert
+
+" For Puppet lint
+let g:syntastic_puppet_puppetlint_args = "--disable_80chars"
+
+" detect Puppet filetype
+autocmd BufRead,BufNewFile *.pp set filetype=puppet
+autocmd BufRead,BufNewFile *.pp setlocal tabstop=4 shiftwidth=4 softtabstop=4 expandtab textwidth=80 smarttab formatoptions-=t
+
+" detect SH filetype
+autocmd BufRead,BufNewFile *.sh set filetype=sh
+autocmd BufRead,BufNewFile *.sh setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
+" detect Perl filetype
+autocmd BufRead,BufNewFile *.pl set filetype=perl
+autocmd BufRead,BufNewFile *.pl setlocal tabstop=4 shiftwidth=4 softtabstop=4 noexpandtab textwidth=80 smarttab
+
+" detect yaml files
+autocmd BufRead,BufNewFile *.yml set filetype=yaml
+autocmd BufRead,BufNewFile *.yaml set filetype=yaml
+autocmd BufRead,BufNewFile *.yml setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+autocmd BufRead,BufNewFile *.yaml setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
+" detect jinja2 files
+autocmd BufRead,BufNewFile *.j2 set filetype=jinja
+autocmd BufRead,BufNewFile *.j2 setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
+" remeber the last 100 marks
+" limit the number of lines to 1000 per register
+" register with more than 100kb text are skipped
+" disable search highlighting on vim startup
+set viminfo='100,<1000,s100,h
+
+" cursorline number bold
+hi CursorLineNr term=bold cterm=bold ctermfg=031 gui=bold
+
+" cursorline bold
+set cursorline
+hi CursorLine term=bold cterm=bold guibg=Grey40
+
+
+" Only do this part when compiled with support for autocommands
+if has("autocmd")
+  augroup openwrt
+  autocmd!
+  " When editing a file, always jump to the last cursor position
+  autocmd BufReadPost *
+  \ if line("'\"") > 0 && line ("'\"") <= line("$") |
+  \   exe "normal! g'\"" |
+  \ endif
+  " don't write swapfile on most commonly used directories for NFS mounts or USB sticks
+  autocmd BufNewFile,BufReadPre /media/*,/run/media/*,/mnt/* set directory=~/tmp,/var/tmp,/tmp
+  augroup END
+endif

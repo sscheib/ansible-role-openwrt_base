@@ -1,0 +1,16 @@
+---
+- name: 'sysctl | Apply sysctl keys'
+  ansible.posix.sysctl:
+    name: '{{ __t_sysctl_key.name }}'
+    ignoreerrors: '{{ __t_sysctl_key.ignoreerrors | default(omit) }}'
+    reload: '{{ __t_sysctl_key.reload | default(omit) }}'
+    state: '{{ __t_sysctl_key.state | default(omit) }}'
+    sysctl_file: '{{ __t_sysctl_key.sysctl_file | default(omit) }}'
+    sysctl_set: '{{ __t_sysctl_key.sysctl_set | default(omit) }}'
+    value: '{{ __t_sysctl_key.value }}'
+  become: true
+  loop: '{{ _owb_sysctl_keys }}'
+  loop_control:
+    loop_var: '__t_sysctl_key'
+    label: '{{ __t_sysctl_key.name }}'
+...

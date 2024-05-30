@@ -1,0 +1,62 @@
+---
+- name: 'vim | Ensure no other vim packages are installed prior to installing: {{ _owb_vim_package_name }}'
+  ansible.builtin.package:
+    name: '{{ _owb_vim_package_match_list }}'
+    state: 'absent'
+  become: true
+
+- name: 'vim | Ensure vim is installed: {{ _owb_vim_package_name }}'
+  ansible.builtin.package:
+    name: '{{ _owb_vim_package_name }}'
+    state: 'present'
+    update_cache: true
+  become: true
+
+- name: 'vim | Deploy a default vim configuration: {{ _owb_vimrc_default_conf_dest_path }}'  # nospell
+  ansible.builtin.copy:
+    src: '{{ _owb_vimrc_default_conf_src }}'
+    dest: '{{ _owb_vimrc_default_conf_dest_path }}'
+    owner: '{{ _owb_vimrc_default_conf_owner }}'
+    group: '{{ _owb_vimrc_default_conf_group }}'
+    mode: '{{ _owb_vimrc_default_conf_mode }}'
+  become: true
+  when:
+    - '_owb_vimrc_default_configuration_enable is defined'
+    - '_owb_vimrc_default_configuration_enable'
+
+- name: 'vim | Block: Handle deploying a simplistic vimrc to user home directories'
+  become: true
+  when:
+    - '_owb_vimrc_simplistic_user_vimrc_enable is defined'
+    - '_owb_vimrc_simplistic_user_vimrc_enable'
+  block:
+
+    - name: 'vim | Place simplistic .vimrc in /root directory to allow copying from clipboard'
+      ansible.builtin.copy:
+        content: '{{ _owb_vimrc_simplistic_content }}'
+        dest: '/root/.vimrc'
+        owner: 'root'
+        group: 'root'
+        mode: '{{ _owb_vimrc_simplistic_mode }}'
+
+    - name: 'vim | Place simplistic .vimrc in user directories to allow copying from clipboard'
+      ansible.builtin.copy:
+        content: '{{ _owb_vimrc_simplistic_content }}'
+        dest: >-
+          {{
+            '{{ __t_user.home }}/.vimrc'
+            if
+            __t_user.home is defined
+            and __t_user.home != ''
+            and __t_user.home != None
+            else
+            '/home/{{ __t_user.name }}/.vimrc'
+          }}
+        owner: '{{ __t_user.name }}'
+        group: '{{ __t_user.name }}'
+        mode: '{{ _owb_vimrc_simplistic_mode }}'
+      loop: '{{ _owb_vimrc_users }}'
+      loop_control:
+        loop_var: '__t_user'
+        label: '{{ __t_user.name }}'
+...

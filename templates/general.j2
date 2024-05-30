@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+# Check the window size after each command and, if necessary,
+# Update the values of LINES and COLUMNS.
+# This attempts to correct line-wrapping-over-prompt issues when a window is resized
+shopt -s checkwinsize
+
+# trim directory size in bash prompt
+PROMPT_DIRTRIM=2

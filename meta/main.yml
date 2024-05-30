@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: 'sscheib'
+  role_name: 'openwrt_base'
+  description: 'Apply a "base" configuration to OpenWrt systems'
+  license: 'GPL-2.0-or-later'
+  min_ansible_version: 2.14
+  platforms:
+    - name: 'OpenWrt'
+      versions:
+        - '21.02'
+        - '23.05'
+
+  galaxy_tags:
+    - 'openwrt'
+
+dependencies: []
+...

@@ -1,0 +1,402 @@
+---
+#
+# UCI
+#
+
+# whether to enable setting of UCI keys
+_owb_uci_keys_enable: '{{ owb_uci_keys_enable | default(_def_owb_uci_keys_enable) }}'
+
+# UCI keys to set
+_owb_uci_keys: '{{ owb_uci_keys | default(_def_owb_uci_keys) }}'
+
+# whether to enable removal of UCI keys
+_owb_uci_keys_removal_enable: '{{ owb_uci_keys_removal_enable | default(_def_owb_uci_keys_removal_enable) }}'
+
+# UCI keys to delete
+_owb_uci_keys_remove: '{{ owb_uci_keys_remove | default(_def_owb_uci_keys_remove) }}'
+
+#
+# sysctl
+#
+
+# whether to set sysctl keys
+_owb_sysctl_enable: '{{ owb_sysctl_enable | default(_def_owb_sysctl_enable) }}'
+
+# keys to set in the sysctl config file
+# if not overriden, the default disables IPv6 on all interfaces
+_owb_sysctl_keys: '{{ owb_sysctl_keys | default(_def_owb_sysctl_keys) }}'
+
+#
+# chrony
+#
+
+# whether to enable the installation and configuration of chrony
+_owb_chrony_enable: '{{ owb_chrony_enable | default(_def_owb_chrony_enable) }}'
+
+# chrony package name
+_owb_chrony_package_name: '{{ owb_chrony_package_name | default(_def_owb_chrony_package_name) }}'
+
+# ntpd package name to remove
+_owb_ntpd_package_name: '{{ owb_ntpd_package_name | default(_def_owb_ntpd_package_name) }}'
+
+# chrony service name
+_owb_chrony_service_name: '{{ owb_chrony_service_name | default(_def_owb_chrony_service_name) }}'
+
+# chrony source Jinja2 template file
+_owb_chrony_conf_src_file: '{{ owb_chrony_conf_src_file | default(_def_owb_chrony_conf_src_file) }}'
+
+# chrony configuration file path and permissions
+_owb_chrony_conf_dest: '{{ owb_chrony_conf_dest | default(_def_owb_chrony_conf_dest) }}'
+_owb_chrony_conf_owner: '{{ owb_chrony_conf_owner | default(_def_owb_chrony_conf_owner) }}'
+_owb_chrony_conf_group: '{{ owb_chrony_conf_group | default(_def_owb_chrony_conf_group) }}'
+_owb_chrony_conf_mode: '{{ owb_chrony_conf_mode | default(_def_owb_chrony_conf_mode) }}'
+
+# chrony init.d script path
+_owb_chrony_initd_file: '{{ owb_chrony_initd_file | default(_def_owb_chrony_initd_file) }}'
+
+# whether to disable IPv6 in chrony
+_owb_chrony_disable_ipv6: '{{ owb_chrony_disable_ipv6 | default(_def_owb_chrony_disable_ipv6) }}'
+
+# whether to run chronyc sources to check if they are reachable
+# note: chronyc sources exits with a return code greater than 0
+#       if an issue is encountered while reaching the defined
+#       servers
+_owb_chrony_check_sources_enable: >-
+  {{
+    owb_chrony_check_sources_enable | default(_def_owb_chrony_check_sources_enable)
+  }}
+
+#
+# rc.local
+#
+
+# whether to enable generation of an rc.local file
+_owb_rc_local_enable: '{{ owb_rc_local_enable | default(_def_owb_rc_local_enable) }}'
+
+# source Jinja2 template for the rc.local file
+_owb_rc_local_template: '{{ owb_rc_local_template | default(_def_owb_rc_local_template) }}'
+
+# path of the rc.local file and permissions
+_owb_rc_local_dest: '{{ owb_rc_local_dest | default(_def_owb_rc_local_dest) }}'
+_owb_rc_local_owner: '{{ owb_rc_local_owner | default(_def_owb_rc_local_owner) }}'
+_owb_rc_local_group: '{{ owb_rc_local_group | default(_def_owb_rc_local_group) }}'
+_owb_rc_local_mode: '{{ owb_rc_local_mode | default(_def_owb_rc_local_mode) }}'
+
+# whether to write messages to serial device within rc.local
+_owb_rc_local_enable_write_to_serial: >-
+  {{
+    owb_rc_local_enable_write_to_serial | default(_def_owb_rc_local_enable_write_to_serial)
+  }}
+
+# serial device to write to in rc.local
+_owb_rc_local_serial_device: '{{ owb_rc_local_serial_device | default(_def_owb_rc_local_serial_device) }}'
+
+# whether to restart mwan3 when executing rc.local
+_owb_rc_local_enable_mwan3_restart: >-
+  {{
+    owb_rc_local_enable_mwan3_restart | default(_def_owb_rc_local_enable_mwan3_restart)
+  }}
+
+# path to the init.d file for mwan3
+_owb_rc_local_mwan3_initd_path: '{{ owb_rc_local_mwan3_initd_path | default(_def_owb_rc_local_mwan3_initd_path) }}'
+
+# whether to sleep before applying iptables and mounting (potentially NFS paths) to
+# allow networking to come up
+_owb_rc_local_enable_sleep: '{{ owb_rc_local_enable_sleep | default(_def_owb_rc_local_enable_sleep) }}'
+
+# number of seconds to sleep
+_owb_rc_local_sleep_seconds: '{{ owb_rc_local_sleep_seconds | default(_def_owb_rc_local_sleep_seconds) }}'
+
+# whether to enable restoring iptables within rc.local
+_owb_rc_local_enable_restore_iptables: >-
+  {{
+    owb_rc_local_enable_restore_iptables | default(_def_owb_rc_local_enable_restore_iptables)
+  }}
+
+# path to an executable (e.g. /etc/iptables.sh) to apply iptables rules
+_owb_rc_local_iptables_rules_file_path: '{{ owb_rc_local_iptables_rules_file_path | default(None) }}'
+
+# whether to redirect command output to /dev/null in rc.local to not clutter the syslog
+_owb_rc_local_enable_redirect_dev_null: >-
+  {{
+    owb_rc_local_enable_redirect_dev_null | default(_def_owb_rc_local_enable_redirect_dev_null)
+  }}
+
+#
+# root user
+#
+
+# whether to enable setting the root password
+_owb_root_password_enable: >-
+  {{
+    owb_root_password_enable | default(_def_owb_root_password_enable)
+  }}
+
+# password for the root user for SSH and LuCI
+_owb_root_password: '{{ owb_root_password | default(None) }}'
+
+# password hash to use when generating a root password
+# by default OpenWrt 21.02 - 23.05 use bcrypt
+_owb_password_hash: '{{ owb_password_hash | default(_def_owb_password_hash) }}'
+
+# whether to enable setting the root shell (default '/bin/sh')  # nospell
+_owb_root_shell_enable: '{{ owb_root_shell_enable | default(_def_owb_root_shell_enable) }}'
+
+# list of packages to install prior to setting the shell for the root user
+_owb_shell_packages: '{{ owb_shell_packages | default(_def_owb_shell_packages) }}'
+
+# path to an alternative shell to use
+# e.g.: '/bin/bash'  # nospell
+_owb_root_shell: '{{ owb_root_shell | default(_def_owb_root_shell) }}'
+
+#
+# shadow
+#
+
+# whether to enable the installation of the shadow package
+_owb_shadow_enable: '{{ owb_enable_shadow | default(_def_owb_shadow_enable) }}'
+
+# list of packages to install to provide shadow functionality
+_owb_shadow_packages: '{{ owb_shadow_packages | default(_def_owb_shadow_packages) }}'
+
+#
+# password hash/encryption method
+#
+
+# whether to enable the password hash/encryption method changing
+# note: this *requires* enabling configuration of shadow, which provides
+# the file '/etc/login.defs'  # nospell
+_owb_password_hash_encryption_enable: >-
+  {{
+    owb_password_hash_encryption_enable | default(_def_owb_password_hash_encryption_enable)
+  }}
+
+# encryption and hash to be used for user account passwords (including root)
+# important note:
+#   if changing below's default encryption, *all* existing user passwords need to be set again, as otherwise
+#   *nobody* will be able to login
+_owb_login_defs_encrypt_method: '{{ owb_login_defs_encrypt_method | default(_def_owb_login_defs_encrypt_method) }}'
+
+# path to the login.defs file where the change is implemented
+_owb_login_defs_file: '{{ owb_login_defs_file | default(_def_owb_login_defs_file) }}'
+
+#
+# mounts
+#
+
+# whether to enable configuration of mounts
+_owb_mounts_enable: '{{ owb_mounts_enable | default(_def_owb_mounts_enable) }}'
+
+# packages required to install before attempting to mount
+# for NFS, e.g.:
+# - 'kmod-fs-nfs-v4'
+# - 'nfs-utils'
+# - 'kmod-fs-nfs'
+_owb_mounts_required_packages: '{{ owb_mounts_required_packages | default(None) }}'
+
+# mount points to create and mount
+_owb_mounts: '{{ owb_mounts | default(None) }}'
+
+#
+# base packages
+#
+
+# whether to install base packages
+_owb_base_packages_enable: '{{ owb_install_base_packages | default(_def_owb_base_packages_enable) }}'
+
+# list of packages to install
+_owb_base_packages: '{{ owb_base_packages | default([]) }}'
+
+#
+# vim
+#
+
+# whether to configure vim
+_owb_vim_enable: '{{ owb_vim_enable | default(_def_owb_vim_enable) }}'
+
+# whether to deploy a default configuration
+_owb_vimrc_default_configuration_enable: >-
+  {{
+    owb_vimrc_default_configuration_enable | default(_def_owb_vimrc_default_configuration_enable)
+  }}
+
+# source file of the default vimrc configuration file
+_owb_vimrc_default_conf_src: '{{ owb_vimrc_default_conf_src | default(_def_owb_vimrc_default_conf_src) }}'
+
+# where to place the default vimrc configuration file
+_owb_vimrc_default_conf_dest_path: >-
+  {{
+    owb_vimrc_default_conf_dest_path | default(_def_owb_vimrc_default_conf_dest_path)
+  }}
+
+# owner, group and permissions of the vimrc default configuration file
+_owb_vimrc_default_conf_owner: '{{ owb_vimrc_default_conf_owner | default(_def_owb_vimrc_default_conf_owner) }}'
+_owb_vimrc_default_conf_group: '{{ owb_vimrc_default_conf_group | default(_def_owb_vimrc_default_conf_group) }}'
+_owb_vimrc_default_conf_mode: '{{ owb_vimrc_default_conf_mode | default(_def_owb_vimrc_default_conf_mode) }}'
+
+# whether to place a simplistic .vimrc in user directories (including /root)
+_owb_vimrc_simplistic_user_vimrc_enable: >-
+  {{
+    owb_vimrc_simplistic_user_vimrc_enable | default(_def_owb_vimrc_simplistic_user_vimrc_enable)
+  }}
+
+# content to add to the simplistic .vimrc file
+_owb_vimrc_simplistic_content: '{{ owb_vimrc_simplistic_content | default(_def_owb_vimrc_simplistic_content) }}'
+
+# mode of the simplistic .vimrc
+_owb_vimrc_simplistic_mode: '{{ owb_vimrc_simplistic_mode | default(_def_owb_vimrc_simplistic_mode) }}'
+
+# package name of vim to install
+_owb_vim_package_name: '{{ owb_vim_package_name | default(_def_owb_vim_package_name) }}'
+
+# prior to installing above package the below packages should be removed to avoid conflicts while installing
+_owb_vim_package_match_list: '{{ owb_vim_package_match_list | default(_def_owb_vim_package_match_list) }}'
+
+# users to add a simplistic .vimrc into the home directory (other than root)
+# if home is not set for a user, it is assumed home is: /home/<user_name>
+#
+# begin nospell
+#
+# following format is expected:
+# owb_vimrc_users:
+#   - name: 'foo'
+#   - name: 'bar'
+#     home: '/custom/home/for/bar'
+# end nospell
+_owb_vimrc_users: '{{ owb_vimrc_users | default([]) }}'
+
+#
+# profile.d
+#
+
+# whether profile.d files and templates should be transferred
+_owb_profile_d_configuration_enable: >-
+  {{
+    owb_profile_d_configuration_enable | default(_def_profile_d_configuration_enable)
+  }}
+
+# whether the profile.d directory should be created
+_owb_profile_d_creation_enable: '{{ owb_profile_d_creation_enable | default(_def_profile_d_creation_enable) }}'
+
+# path and permissions to the profile.d directory where below BASH related scripts are placed
+_owb_profile_d_path: '{{ owb_profile_d_path | default(_def_owb_profile_d_path) }}'
+_owb_profile_d_path_owner: '{{ owb_profile_d_path_owner | default(_def_owb_profile_d_path_owner) }}'
+_owb_profile_d_path_group: '{{ owb_profile_d_path_group | default(_def_owb_profile_d_path_group) }}'
+_owb_profile_d_path_mode: '{{ owb_profile_d_path_mode | default(_def_owb_profile_d_path_mode) }}'
+
+# files to place in the profile.d path
+_owb_profile_d_files: '{{ owb_profile_d_files | default(_def_owb_profile_d_files) }}'
+
+#
+# cron
+#
+
+# whether to enable configuration of cron
+_owb_cron_enable: '{{ owb_cron_enable | default(_def_owb_cron_enable) }}'
+
+# cron jobs to create
+_owb_cron_jobs: '{{ owb_cron_jobs | default(_def_owb_cron_jobs) }}'
+
+#
+# hosts file
+#
+
+# whether to enable generation of the hosts file
+_owb_hosts_file_enable: '{{ owb_hosts_file_enable | default(_def_owb_hosts_file_enable) }}'
+
+# the interface name of the LAN device to detect the LAN ip
+# which will be written to /etc/hosts along with the hostname
+_owb_lan_interface_name: '{{ owb_lan_interface_name | default(_def_owb_lan_interface_name) }}'
+
+# path and permissions of the hosts file (usually /etc/hosts)
+_owb_hosts_file_path: '{{ owb_hosts_file_path | default(_def_owb_hosts_file_path) }}'
+_owb_hosts_file_owner: '{{ owb_hosts_file_owner | default(_def_owb_hosts_file_owner) }}'
+_owb_hosts_file_group: '{{ owb_hosts_file_group | default(_def_owb_hosts_file_group) }}'
+_owb_hosts_file_mode: '{{ owb_hosts_file_mode | default(_def_owb_hosts_file_mode) }}'
+
+#
+# hostname
+#
+
+# whether to create the host name file
+_owb_hostname_enable: '{{ owb_hostname_enable | default(_def_owb_hostname_enable) }}'
+
+# hostname to set
+_owb_hostname: '{{ owb_hostname | default(_def_owb_hostname) }}'
+
+# path to the /proc item that holds the hostname
+# this is used in the rc.local to apply the hostname on each boot
+_owb_hostname_proc_path: '{{ owb_hostname_proc_path | default(_def_owb_hostname_proc_path) }}'
+
+# path and permissions for the hostname file
+_owb_hostname_path: '{{ owb_hostname_path | default(_def_owb_hostname_path) }}'
+_owb_hostname_owner: '{{ owb_hostname_owner | default(_def_owb_hostname_owner) }}'
+_owb_hostname_group: '{{ owb_hostname_group | default(_def_owb_hostname_group) }}'
+_owb_hostname_mode: '{{ owb_hostname_mode | default(_def_owb_hostname_mode) }}'
+
+#
+# transfer files
+#
+
+# files to transfer
+_owb_transfer_files: '{{ owb_transfer_files | default([]) }}'
+
+#
+# users
+#
+
+# whether to enable user creation
+_owb_users_enable: '{{ owb_users_enable | default(_def_owb_users_enable) }}'
+
+# packages required to install prior to adding users
+_owb_users_required_packages: '{{ owb_users_required_packages | default(_def_owb_users_required_packages) }}'
+
+# users to add
+_owb_users: '{{ owb_users | default([]) }}'
+
+#
+# sudoers.d
+#
+
+# whether to enable the creation of sudoers.d configuration files
+#
+# for every group that is defined as 'privileged' in owb_users
+# a configuration file is generated with the following content:
+#   %MY_GROUP ALL=(ALL) NOPASSWD: ALL  # nospell
+#
+# this applies to both primary groups, which are defined as 'group' and
+# additional_groups that have set the privileged flag
+#
+_owb_sudoers_d_enable: '{{ owb_sudoers_d_enable | default(_def_owb_sudoers_d_enable) }}'
+
+# path and permissions to the sudoers.d directory
+_owb_sudoers_d_path: '{{ owb_sudoers_d_path | default(_def_owb_sudoers_d_path) }}'
+_owb_sudoers_d_owner: '{{ owb_sudoers_d_owner | default(_def_owb_sudoers_d_owner) }}'
+_owb_sudoers_d_group: '{{ owb_sudoers_d_group | default(_def_owb_sudoers_d_group) }}'
+_owb_sudoers_d_mode: '{{ owb_sudoers_d_mode | default(_def_owb_sudoers_d_mode) }}'
+
+# permissions for files placed in sudoers.d
+_owb_sudoers_d_files_owner: '{{ owb_sudoers_d_files_owner | default(_def_owb_sudoers_d_files_owner) }}'
+_owb_sudoers_d_files_group: '{{ owb_sudoers_d_files_group | default(_def_owb_sudoers_d_files_group) }}'
+_owb_sudoers_d_files_mode: '{{ owb_sudoers_d_files_mode | default(_def_owb_sudoers_d_files_mode) }}'
+
+#
+# authorized keys
+#
+
+# whether to enable transferring of authorized_keys defined in owb_users
+_owb_authorized_keys_enable: '{{ owb_authorized_keys_enable | default(_def_owb_authorized_keys_enable) }}'
+
+# whether to set no_log for authorized_keys tasks
+_owb_authorized_keys_no_log: '{{ owb_authorized_keys_no_log | default(_def_owb_authorized_keys_no_log) }}'
+
+#
+# general
+#
+
+# whether to quiet assert statements
+_owb_quiet_assert: '{{ owb_quiet_assert | default(_def_owb_quiet_assert) }}'
+
+# whether to skip the initial assert
+_owb_skip_assert: '{{ owb_skip_assert | default(_def_owb_skip_assert) }}'
+...

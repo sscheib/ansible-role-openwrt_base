@@ -1,0 +1,40 @@
+---
+- name: 'sudoers_d | Ensure the sudoers.d path exists: {{ _owb_sudoers_d_path }}'
+  ansible.builtin.file:
+    state: 'directory'
+    path: '{{ _owb_sudoers_d_path }}'
+    owner: '{{ _owb_sudoers_d_owner }}'
+    group: '{{ _owb_sudoers_d_group }}'
+    mode: '{{ _owb_sudoers_d_mode }}'
+  become: true
+
+- name: 'sudoers_d | Ensure that privileged groups are able to use sudo without password'
+  ansible.builtin.copy:
+    content: >
+      %{{ __t_group }} ALL=(ALL) NOPASSWD: ALL
+    dest: '{{ _owb_sudoers_d_path }}/{{ __t_group }}'
+    owner: '{{ _owb_sudoers_d_files_owner }}'
+    group: '{{ _owb_sudoers_d_files_group }}'
+    mode: '{{ _owb_sudoers_d_files_mode }}'
+  become: true
+  loop: >-
+    {{
+      (
+        _owb_users |
+        selectattr('group', 'defined') |
+        selectattr('privileged', 'defined') |
+        selectattr('privileged', '==', true) |
+        map(attribute='group')
+        +
+        _owb_users |
+        selectattr('additional_groups', 'defined') |
+        map(attribute='additional_groups') |
+        ansible.builtin.flatten |
+        selectattr('privileged', 'defined') |
+        selectattr('privileged', '==', true) |
+        map(attribute='name')
+      ) | unique
+    }}
+  loop_control:
+    loop_var: '__t_group'
+...

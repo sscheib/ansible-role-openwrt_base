@@ -1,0 +1,208 @@
+---
+- name: 'Ensure _owb_skip_assert is defined properly'
+  ansible.builtin.assert:
+    that:
+      - '_owb_skip_assert is defined'
+      - '_owb_skip_assert is boolean'
+      - '_owb_skip_assert | bool | string == _owb_skip_assert | string'
+    success_msg: "Variable '{{ _owb_skip_assert }}' defined properly - value: '{{ _owb_skip_assert }}'"
+    fail_msg: "Variable '{{ _owb_skip_assert }}' failed to validate"
+    quiet: '{{ _owb_quiet_assert | default(false) }}'
+
+- name: 'Include tasks to ensure prerequisites are met'
+  ansible.builtin.include_tasks:
+    file: 'assert.yml'
+  when: >-
+    _owb_skip_assert is not defined
+    or not _owb_skip_assert
+
+- name: 'Include tasks to set up UCI values'
+  ansible.builtin.include_tasks:
+    file: 'uci.yml'
+  # only include UCI tasks if either keys to
+  # set or to remove are present
+  when: >-
+    (
+      _owb_uci_keys_enable is defined
+      and _owb_uci_keys_enable
+      and _owb_uci_keys is defined
+      and _owb_uci_keys | length > 0
+    )
+    or
+    (
+      _owb_uci_keys_removal_enable is defined
+      and _owb_uci_keys_removal_enable
+      and _owb_uci_keys_remove is defined
+      and _owb_uci_keys_remove | length > 0
+    )
+
+- name: 'Include tasks to setup file /etc/hosts'
+  ansible.builtin.include_tasks:
+    file: 'hosts_file.yml'
+  when:
+    - '_owb_hosts_file_enable is defined'
+    - '_owb_hosts_file_enable'
+
+- name: 'Include tasks to set sysctl values'
+  ansible.builtin.include_tasks:
+    file: 'sysctl.yml'
+  when:
+    - '_owb_sysctl_enable is defined'
+    - '_owb_sysctl_enable'
+    - '_owb_sysctl_keys is defined'
+    - '_owb_sysctl_keys | length > 0'
+
+- name: 'Include tasks to setup chrony'
+  ansible.builtin.include_tasks:
+    file: 'chrony.yml'
+  when:
+    - '_owb_chrony_enable is defined'
+    - '_owb_chrony_enable'
+
+- name: 'Include tasks to set up the hostname'
+  ansible.builtin.include_tasks:
+    file: 'hostname.yml'
+  when:
+    - '_owb_hostname_enable is defined'
+    - '_owb_hostname_enable'
+
+- name: 'Include tasks to set up rc.local'
+  ansible.builtin.include_tasks:
+    file: 'rc_local.yml'
+  when:
+    - '_owb_rc_local_enable is defined'
+    - '_owb_rc_local_enable'
+
+- name: 'Include tasks to set up mounts'
+  ansible.builtin.include_tasks:
+    file: 'mounts.yml'
+  when:
+    - '_owb_mounts_enable is defined'
+    - '_owb_mounts_enable'
+    - '_owb_mounts is defined'
+    - '_owb_mounts | length > 0'
+
+- name: 'Include tasks to create users'
+  ansible.builtin.include_tasks:
+    file: 'users.yml'
+  when:
+    - '_owb_users_enable is defined'
+    - '_owb_users_enable'
+    - '_owb_users is defined'
+    - '_owb_users | length > 0'
+
+- name: 'Include tasks to create sudoers.d configuration files'
+  ansible.builtin.include_tasks:
+    file: 'sudoers_d.yml'
+  # include only when there is at least one primary or additional
+  # group that is privileged
+  when:
+    - '_owb_sudoers_d_enable is defined'
+    - '_owb_sudoers_d_enable'
+    - >-
+        (
+          _owb_users |
+          selectattr('group', 'defined') |
+          selectattr('privileged', 'defined') |
+          selectattr('privileged', '==', true)
+          +
+          _owb_users |
+          selectattr('additional_groups', 'defined') |
+          map(attribute='additional_groups') |
+          ansible.builtin.flatten |
+          selectattr('privileged', 'defined') |
+          selectattr('privileged', '==', true)
+        ) | length > 0
+
+- name: 'Include tasks to transfer authorized keys'
+  ansible.builtin.include_tasks:
+    file: 'authorized_keys.yml'
+  when:
+    - '_owb_authorized_keys_enable is defined'
+    - '_owb_authorized_keys_enable'
+    - '_owb_users is defined'
+    - >-
+      _owb_users |
+      selectattr('authorized_keys', 'defined') |
+      ansible.builtin.subelements('authorized_keys') |
+      length > 0
+
+- name: 'Include tasks to transfer files'
+  ansible.builtin.include_tasks:
+    file: 'transfer_files.yml'
+  when:
+    - '_owb_transfer_files is defined'
+    - '_owb_transfer_files | length > 0'
+
+- name: 'Include tasks to install shadow packages'
+  ansible.builtin.include_tasks:
+    file: 'shadow.yml'
+  when:
+    - '_owb_shadow_enable is defined'
+    - '_owb_shadow_enable'
+
+- name: 'Include tasks to set the encryption method for passwords'
+  ansible.builtin.include_tasks:
+    file: 'encrypt_method.yml'
+  # changing the encryption method needs the shadow package, as this
+  # provides the file
+  # '/etc/login.defs'  # nospell
+  when:
+    - '_owb_shadow_enable is defined'
+    - '_owb_shadow_enable'
+    - '_owb_password_hash_encryption_enable is defined'
+    - '_owb_password_hash_encryption_enable'
+
+- name: 'Include tasks to set a root password'
+  ansible.builtin.include_tasks:
+    file: 'root_password.yml'
+  when:
+    - '_owb_root_password_enable is defined'
+    - '_owb_root_password_enable'
+
+- name: 'Include tasks to set the root shell'
+  ansible.builtin.include_tasks:
+    file: 'root_shell.yml'
+  when:
+    - '_owb_enable_root_shell_change is defined'
+    - '_owb_enable_root_shell_change'
+
+- name: 'Include tasks to install base packages'
+  ansible.builtin.include_tasks:
+    file: 'install_packages.yml'
+  when:
+    - '_owb_base_packages_enable is defined'
+    - '_owb_base_packages_enable'
+    - '_owb_base_packages is defined'
+    - '_owb_base_packages | length > 0'
+
+- name: 'Include tasks to configure vim'
+  ansible.builtin.include_tasks:
+    file: 'vim.yml'
+  when:
+    - '_owb_vim_enable is defined'
+    - '_owb_vim_enable'
+
+- name: 'Include tasks to setup profile.d'
+  ansible.builtin.include_tasks:
+    file: 'profile_d.yml'
+  when: >-
+    (
+      _owb_profile_d_configuration_enable is defined
+      and _owb_profile_d_configuration_enable
+    )
+    or
+    (
+      _owb_profile_d_creation_enable is defined
+      and _owb_profile_d_creation_enable
+    )
+
+- name: 'Include tasks to deploy a cron job'
+  ansible.builtin.include_tasks:
+    file: 'cron.yml'
+  when:
+    - '_owb_cron_enable is defined'
+    - '_owb_cron_enable'
+    - '_owb_cron_jobs is defined'
+    - '_owb_cron_jobs | length > 0'
+...

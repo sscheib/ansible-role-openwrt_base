@@ -1,0 +1,25 @@
+# {{ ansible_managed }}'
+config pool
+        option hostname '0.de.pool.ntp.org'
+        option maxpoll '9'
+        option iburst 'yes'
+
+config pool
+        option hostname '1.de.pool.ntp.org'
+        option maxpoll '9'
+        option iburst 'yes'
+
+config pool
+        option hostname '2.de.pool.ntp.org'
+        option maxpoll '9'
+        option iburst 'yes'
+
+config dhcp_ntp_server
+        option disabled 'yes'
+
+config allow
+        option interface 'lan'
+
+config makestep
+        option threshold '1.0'
+        option limit '3'

@@ -1,0 +1,10 @@
+---
+- name: 'hostname | Create hostname file at: {{ _owb_hostname_path }}'
+  ansible.builtin.copy:
+    content: '{{ inventory_hostname }}'
+    dest: '{{ _owb_hostname_path }}'
+    owner: '{{ _owb_hostname_owner }}'
+    group: '{{ _owb_hostname_group }}'
+    mode: '{{ _owb_hostname_mode }}'
+  become: true
+...
