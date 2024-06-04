@@ -6,36 +6,40 @@
         __t_authorized_keys | default([]) + [
           {
             'user': __t_item.0.name,
-            'key': lookup('file', __t_item.1)
+            'key': lookup(
+              'ansible.builtin.file',
+              lookup('ansible.builtin.first_found', __t_params)
+            )
           }
         ]
       }}
-  when: >-
-    lookup(
-          'first_found',
-          dict(
-            files=[
-              __t_item.1
-            ],
-            skip=true
-          )
-    ) | ansible.builtin.ternary(
-      lookup(
-        'file',
-        __t_item.1,
-        errors='ignore'
-      ),
-      false
-    )
+  vars:
+    __t_params:
+      files:
+        - '{{ __t_item.1.key }}'
+      paths:
+        - '{{ playbook_dir }}/files'
+        - '{{ inventory_dir }}/files'
+        - '{{ role_path }}/files'
+      skip: true
   no_log: '{{ _owb_authorized_keys_no_log }}'
+  # select only items that have is_file: true specified
   loop: >-
     {{
       _owb_users |
-      selectattr('authorized_keys', 'defined') |
-      ansible.builtin.subelements('authorized_keys')
+      rejectattr('authorized_keys', 'undefined') |
+      ansible.builtin.subelements('authorized_keys') |
+      selectattr('1.is_file', 'defined') |
+      selectattr('1.is_file', '==', true)
     }}
   loop_control:
     loop_var: '__t_item'
+    label: >-
+      {{
+        __t_item.0.name ~
+        ' -> ' ~
+        __t_item.1.name | default('')
+      }}
 
 - name: 'authorized_keys | Append in-line SSH keys'
   ansible.builtin.set_fact:
@@ -44,36 +48,32 @@
         __t_authorized_keys | default([]) + [
           {
             'user': __t_item.0.name,
-            'key': __t_item.1
+            'key': __t_item.1.key
           }
         ]
       }}
-  when: >-
-    not lookup(
-          'first_found',
-          dict(
-            files=[
-              __t_item.1
-            ],
-            skip=true
-          )
-    ) | ansible.builtin.ternary(
-      lookup(
-        'file',
-        __t_item.1,
-        errors='ignore'
-      ),
-      false
-    )
   no_log: '{{ _owb_authorized_keys_no_log }}'
   loop: >-
     {{
       _owb_users |
-      selectattr('authorized_keys', 'defined') |
-      ansible.builtin.subelements('authorized_keys')
+      rejectattr('authorized_keys', 'undefined') |
+      ansible.builtin.subelements('authorized_keys') |
+      selectattr('1.is_file', 'undefined')
+      +
+      _owb_users |
+      rejectattr('authorized_keys', 'undefined') |
+      ansible.builtin.subelements('authorized_keys') |
+      selectattr('1.is_file', 'defined') |
+      selectattr('1.is_file', '==', false)
     }}
   loop_control:
     loop_var: '__t_item'
+    label: >-
+      {{
+        __t_item.0.name ~
+        ' -> ' ~
+        __t_item.1.name | default('')
+      }}
 
 - name: 'authorized_keys | Ensure authorized keys are present'
   ansible.posix.authorized_key:
