@@ -542,8 +542,11 @@
         )
 
       # attribute 'authorized_keys' - optional
-      # if set, ensure that:
-      #   - it is not empty
+      # if set, ensure that, the required attribute 'key':
+      #   - is defined
+      #   - not empty ('')
+      #   - not None
+      #   - a string
       - >-
         (
           _owb_users |
@@ -552,17 +555,25 @@
         ) | ansible.builtin.ternary(
           _owb_users |
           rejectattr('authorized_keys', 'undefined') |
-          map(attribute='authorized_keys') |
+          map(attribute='authorized_keys', default=[]) |
           ansible.builtin.flatten |
-          length > 0,
+          selectattr('key', 'defined') |
+          rejectattr('key', '==', '') |
+          rejectattr('key', '==', 'None') |
+          selectattr('key', 'string') |
+          length
+          ==
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys', default=[]) |
+          ansible.builtin.flatten |
+          length,
           true
         )
 
       # attribute 'authorized_keys' - optional
-      # if set, ensure that, all items:
-      #   - are strings
-      #   - not empty ('')
-      #   - not None
+      # if the optional attribute 'is_file' is set, ensure that:
+      #   - is a boolean
       - >-
         (
           _owb_users |
@@ -571,18 +582,48 @@
         ) | ansible.builtin.ternary(
           _owb_users |
           rejectattr('authorized_keys', 'undefined') |
-          map(attribute='authorized_keys') |
+          map(attribute='authorized_keys', default=[]) |
           ansible.builtin.flatten |
-          select('string') |
-          reject('==', '') |
-          reject('==', 'None') |
-          length | default()
+          selectattr('is_file', 'defined') |
+          selectattr('is_file', 'boolean') |
+          length
           ==
           _owb_users |
           rejectattr('authorized_keys', 'undefined') |
-          map(attribute='authorized_keys') |
+          map(attribute='authorized_keys', default=[]) |
           ansible.builtin.flatten |
-          length | default(),
+          selectattr('is_file', 'defined') |
+          length,
+          true
+        )
+
+      # attribute 'authorized_keys' - optional
+      # if the optional attribute 'name' is set, ensure that
+      #   - not empty ('')
+      #   - not None
+      #   - a string
+      - >-
+        (
+          _owb_users |
+          selectattr('authorized_keys', 'defined') |
+          length > 0
+        ) | ansible.builtin.ternary(
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys', default=[]) |
+          ansible.builtin.flatten |
+          selectattr('name', 'defined') |
+          rejectattr('name', '==', '') |
+          rejectattr('name', '==', 'None') |
+          selectattr('name', 'string') |
+          length
+          ==
+          _owb_users |
+          rejectattr('authorized_keys', 'undefined') |
+          map(attribute='authorized_keys', default=[]) |
+          ansible.builtin.flatten |
+          selectattr('name', 'defined') |
+          length,
           true
         )
 
@@ -699,8 +740,45 @@
         )
 
     success_msg: 'All files in _owb_users are properly defined'
-    fail_msg: 'One or more users or their groups in _owb_users failed to validate'
+    fail_msg: 'One or more users, their groups or SSH keys in _owb_users failed to validate'
     quiet: '{{ _owb_quiet_assert }}'
+
+- name: 'assert | Ensure SSH key files are present when defined'
+  ansible.builtin.assert:
+    that:
+      - >-
+        lookup('ansible.builtin.first_found', __t_params) |
+        length > 0
+    success_msg: 'SSH key for user {{ __t_item.0.name }} has been found: {{ __t_item.1.key }}'
+    fail_msg: 'SSH key for user {{ __t_item.0.name }} has not been found: {{ __t_item.1.key }}'
+    quiet: '{{ _owb_quiet_assert }}'
+  vars:
+    __t_params:
+      files:
+        - '{{ __t_item.1.key }}'
+      paths:
+        - '{{ playbook_dir }}/files'
+        - '{{ inventory_dir }}/files'
+        - '{{ role_path }}/files'
+      skip: true
+  no_log: '{{ _owb_authorized_keys_no_log }}'
+  # select only items that have is_file: true specified
+  loop: >-
+    {{
+      _owb_users |
+      rejectattr('authorized_keys', 'undefined') |
+      ansible.builtin.subelements('authorized_keys') |
+      selectattr('1.is_file', 'defined') |
+      selectattr('1.is_file', '==', true)
+    }}
+  loop_control:
+    loop_var: '__t_item'
+    label: >-
+      {{
+        __t_item.0.name ~
+        ' -> ' ~
+        __t_item.1.name | default('')
+      }}
 
 - name: 'assert | Ensure _owb_vimrc_users is defined properly'
   ansible.builtin.assert:

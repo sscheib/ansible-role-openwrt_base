@@ -156,7 +156,7 @@ owb_cron_jobs:
     job: '/bin/opkg update 2>&1 > /dev/null'
 ```
 
-Only the `name` attribute is required and validated. All other attributes can be mixed and matched.
+Only the `name` attribute is required and validated. All other attributes can be mixed and matched, but are not validated.
 
 This role supports all module options of [`ansible.builtin.cron`](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html) as of this date
 (25.05.2024).
@@ -186,7 +186,7 @@ This role uses [`ansible.posix.mount`](https://docs.ansible.com/ansible/latest/c
 options as of this date (25.05.2024).
 
 With the attributes `owner`, `group` and `mode` the *directory* permissions are specified. In the above example the directory `/backup` will be created with `owner` and
-`group` set to `root` and adjust the `mode` to `0755`.
+`group` set to `root`. The permissions are set via `mode` to `0755`.
 
 Further `path`, `src` and `state` are required parameters.
 
@@ -202,7 +202,7 @@ Required arguments are:
 - `src`
 - `state`
 
-**Note**: `owner`, `group` and `mode` are enforced (although default permissions would be applied when not specified) to set to prevent insecure permissions.
+**Note**: `owner`, `group` and `mode` are enforced to set(although default permissions would be applied when not specified) to prevent insecure permissions.
 
 All other module options of [`ansible.builtin.posix`](https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html) can be mixed and matched.
 
@@ -285,7 +285,7 @@ managed node.
 
 Required attributes are only `name` and `value`. `value` is only validated for its existence, as `value` can be virtually any data type.
 
-All supported module options of [`ansible.posix.sysctl`] as of today (25.05.2024) are supported.
+All module options of [`ansible.posix.sysctl`](https://docs.ansible.com/ansible/latest/collections/ansible/posix/sysctl_module.html) as of today (25.05.2024) are supported.
 
 ## Variable `owb_uci_keys`
 
@@ -363,16 +363,19 @@ owb_users:
 
     remove_unspecified_ssh_keys: true
     authorized_keys:
-      - !vault |
+      - name: 'my ecdsa key'  # this is only used to identify the key when you vault the key - it is entirely optional.
+        key: !vault |
           $ANSIBLE_VAULT;1.2;AES256
           [..]
+        is_file: true
 
-      - 'id_ecdsa.pub'
+      - key: 'id_ecdsa.pub'
+        is_file: true
 ```
 
 Only the `name` is required when specifying no additional groups. When specifying additional groups, each group needs to have the `name` attribute set.
 
-When specifying `group`, `group` will be used set as the primary group for the user. Additional groups specified via `additional_groups` are supplementary groups where
+When specifying `group`, `group` will be set as the primary group for the user. Additional groups specified via `additional_groups` are supplementary groups where
 the user gets added to.
 
 All groups will be created if they don't exist.
@@ -380,17 +383,23 @@ All groups will be created if they don't exist.
 By specifying `privileged: true` (for both the primary as well as for each individual supplementary group) and additionally setting `owb_sudoers_d_enable: true`,
 privileged groups will get a `sudoers.d` file generated with the following content:
 
-When specifying `password`, it will be hashed with `owb_password_hash`.
-
-`authorized_keys` can be specified either by referencing a file or simply by adding in-line `SSH` public keys to the list. Please note that if a file does not exist,
-it will *automatically* interpret the SSH key as in-line key and add it to the `authorized_keys` file.
-
 ```plaintext
 %MY_GROUP ALL=(ALL) NOPASSWD: ALL
 ```
 
-SSH keys can be specified as both in-line SSH keys or by specifying a file that has to exist on the *control* node where the playbook is run. Setting
-`remove_unspecified_ssh_keys: true` will remove all keys that are not specified for each individual user.
+When specifying `password`, it will be hashed with `owb_password_hash`.
+
+`authorized_keys` can be specified either by referencing a file or simply by adding in-line `SSH` public keys to the list. The only required attribute is `key` which either
+specifies a file or an in-line SSH key. Additionally, to specify a file, ensure to set `is_file: true` to the respective entry.
+
+Files can be specified as a relative path, as an absolute path or with the file name only. When specifying the file name only, the following directories will be searched in
+the order below:
+
+- '{{ playbook_dir }}/files'
+- '{{ inventory_dir }}/files'
+- '{{ role_path }}/files'
+
+Setting `remove_unspecified_ssh_keys: true` will remove all keys that are not specified for each individual user.
 
 ## Variable `owb_vimrc_users`
 
@@ -685,14 +694,18 @@ None
         home: '/home/steffen'
         remove_unspecified_ssh_keys: true
         authorized_keys:
-          - !vault |
+          - name: 'my ecdsa key'  # this is only used to identify the key when you vault the key - it is entirely optional.
+            key: !vault |
               $ANSIBLE_VAULT;1.2;AES256
               [..]
+            is_file: true
 
-          - !vault |
+          - key: 'id_ecdsa.pub'
+            is_file: true
+
+          - key: !vault |
               $ANSIBLE_VAULT;1.2;AES256
-              [..]
-          - 'id_ecdsa.pub'
+            [..]
 
     # whether to install base packages
     owb_base_packages_enable: true
