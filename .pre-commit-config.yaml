@@ -13,7 +13,7 @@ ci:
 
 repos:
   - repo: 'https://github.com/ansible/ansible-lint'
-    rev: 'v24.7.0'
+    rev: 'v24.9.2'
     hooks:
       - id: 'ansible-lint'
         stages:
@@ -127,7 +127,7 @@ repos:
         pass_filenames: true
 
   - repo: 'https://github.com/alessandrojcm/commitlint-pre-commit-hook'
-    rev: 'v9.17.0'
+    rev: 'v9.18.0'
     hooks:
       - id: 'commitlint'
         stages:
@@ -146,7 +146,7 @@ repos:
           - 'javascript'
 
   - repo: 'https://github.com/gitleaks/gitleaks'
-    rev: 'v8.18.4'
+    rev: 'v8.19.2'
     hooks:
       - id: 'gitleaks'
         stages:
