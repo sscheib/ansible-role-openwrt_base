@@ -13,7 +13,7 @@ ci:
 
 repos:
   - repo: 'https://github.com/ansible/ansible-lint'
-    rev: 'v25.1.0'
+    rev: 'v25.1.2'
     hooks:
       - id: 'ansible-lint'
         stages:
@@ -118,7 +118,7 @@ repos:
           - '.markdown-link-check.json'
 
   - repo: 'https://github.com/igorshubovych/markdownlint-cli'
-    rev: 'v0.43.0'
+    rev: 'v0.44.0'
     hooks:
       - id: 'markdownlint'
         stages:
@@ -146,7 +146,7 @@ repos:
           - 'javascript'
 
   - repo: 'https://github.com/gitleaks/gitleaks'
-    rev: 'v8.23.1'
+    rev: 'v8.23.3'
     hooks:
       - id: 'gitleaks'
         stages:
