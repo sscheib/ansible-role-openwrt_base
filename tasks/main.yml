@@ -164,8 +164,8 @@
   ansible.builtin.include_tasks:
     file: 'root_shell.yml'
   when:
-    - '_owb_enable_root_shell_change is defined'
-    - '_owb_enable_root_shell_change'
+    - '_owb_root_shell_enable is defined'
+    - '_owb_root_shell_enable'
 
 - name: 'Include tasks to install base packages'
   ansible.builtin.include_tasks:

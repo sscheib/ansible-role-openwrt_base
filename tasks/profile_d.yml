@@ -18,7 +18,7 @@
     - '_owb_profile_d_configuration_enable'
   block:
 
-    - name: 'profile_d | Transfer profil.d configuration files to {{ _owb_profile_d_path }}'
+    - name: 'profile_d | Transfer profile.d configuration files to {{ _owb_profile_d_path }}'
       ansible.builtin.copy:
         src: '{{ __t_file.src }}'
         # the expression looks more complicated than it actually is :)
@@ -83,7 +83,7 @@
         loop_var: '__t_file'
         label: '{{ __t_file.src }}'
 
-    - name: 'profile_d | Template profil.d configuration files to {{ _owb_profile_d_path }}'
+    - name: 'profile_d | Template profile.d configuration files to {{ _owb_profile_d_path }}'
       ansible.builtin.template:
         src: '{{ __t_file.src }}'
         # see the task above for an explanation of this expression
