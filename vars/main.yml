@@ -122,6 +122,18 @@ _owb_rc_local_enable_redirect_dev_null: >-
     owb_rc_local_enable_redirect_dev_null | default(_def_owb_rc_local_enable_redirect_dev_null)
   }}
 
+# whether to enable setting a CPU governor within rc.local
+_owb_rc_local_enable_cpu_governor: >-
+  {{
+    owb_rc_local_enable_cpu_governor | default(_def_owb_rc_local_enable_cpu_governor)
+  }}
+
+# which CPU governor to set the CPU to
+_owb_rc_local_cpu_governor: >-
+  {{
+    owb_rc_local_cpu_governor | default(_def_owb_rc_local_cpu_governor)
+  }}
+
 #
 # root user
 #
