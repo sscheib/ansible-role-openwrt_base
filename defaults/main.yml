@@ -166,6 +166,12 @@ _def_owb_rc_local_enable_restore_iptables: false
 # whether to redirect command output to /dev/null in rc.local to not clutter the syslog
 _def_owb_rc_local_enable_redirect_dev_null: false
 
+# whether to enable setting a CPU governor within rc.local
+_def_owb_rc_local_enable_cpu_governor: false
+
+# which CPU governor to set the CPU to
+_def_owb_rc_local_cpu_governor: 'performance'
+
 #
 # root user
 #

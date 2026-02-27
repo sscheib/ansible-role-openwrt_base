@@ -111,6 +111,8 @@ This role requires the collection [`ansible.posix`](https://github.com/ansible-c
 | `owb_rc_local_serial_device`             | `/dev/ttyS0`                 | false    | Serial device to write to in `rc.local`                                             |
 | `owb_rc_local_sleep_seconds`             | `15`                         | false    | Number of seconds to sleep                                                          |
 | `owb_rc_local_template`                  | `rc.local.j2`                | false    | Source `Jinja2` template for the `rc.local` file                                    |
+| `owb_rc_local_enable_cpu_governor`       | `false`                      | false    | Whether to enable setting a `CPU governor` within `rc.local`                        |
+| `owb_rc_local_cpu_governor`              | `performance`                | false    | Which `CPU governor` to set the `CPU` to                                            |
 | `owb_root_password_enable`               | `false`                      | false    | Whether to enable setting the `root` password                                       |
 | `owb_root_password`                      | unset                        | false    | `root` password to set                                                              |
 | `owb_root_shell_enable`                  | `false`                      | false    | Whether to enable setting the `shell` for the `root` user                           |
